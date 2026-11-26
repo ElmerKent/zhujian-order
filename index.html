@@ -1361,7 +1361,7 @@
       <h3 class="modal-title">Google 試算表雲端連線設定</h3>
       <p class="modal-sub">已內建您的專屬 Google Apps Script 接收網址，開啟網頁即自動連線。</p>
       <div style="margin-bottom:14px;">
-        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Apps Script Web App 網址</label>
+        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Apps Script Web App 網址（/exec 結尾）</label>
         <input type="text" id="gasUrlInput" class="input-field" style="width:100%; font-size:12px;" />
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center;">
@@ -1388,14 +1388,14 @@
 
   <script>
     // =========================================================================
-    // 方法 A：已寫入您的 Google Apps Script 專屬接收網址
+    // 方法 A：已寫入您的 Google Apps Script 專屬網頁應用程式（/exec）接收網址
     // =========================================================================
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbx8b_DCO9YNgqkfIKNrWKkM2_sp907ij2RlA4W55DlNXrKkoRxsu4EyQsm3EN5_MrOdCA/exec";
 
-    const STORAGE_KEY_ORDERS = "zhujian_group_orders_v2";
-    const STORAGE_KEY_PERSON = "zhujian_current_person_v2";
-    const STORAGE_KEY_GAS_URL = "zhujian_gas_url_v2";
-    const STORAGE_KEY_MODE = "zhujian_dining_mode_v2";
+    const STORAGE_KEY_ORDERS = "zhujian_group_orders_v3";
+    const STORAGE_KEY_PERSON = "zhujian_current_person_v3";
+    const STORAGE_KEY_GAS_URL = "zhujian_gas_url_v3";
+    const STORAGE_KEY_MODE = "zhujian_dining_mode_v3";
 
     // Complete Menu Data (General Stores)
     const BROTHS = [
@@ -1507,11 +1507,15 @@
 
     function getInitialGasUrl() {
       const params = new URLSearchParams(window.location.search);
-      if (params.get("api")) {
-        return params.get("api").trim();
+      const paramApi = (params.get("api") || "").trim();
+      if (paramApi && paramApi.includes("/exec")) {
+        return paramApi;
       }
-      const saved = localStorage.getItem(STORAGE_KEY_GAS_URL);
-      return saved && saved.startsWith("http") ? saved : DEFAULT_GAS_URL;
+      const saved = (localStorage.getItem(STORAGE_KEY_GAS_URL) || "").trim();
+      if (saved && saved.startsWith("http") && saved.includes("/exec")) {
+        return saved;
+      }
+      return DEFAULT_GAS_URL;
     }
 
     // Load local cache first for instant paint
@@ -1645,7 +1649,6 @@
     }
 
     async function commitAddOrder(orderData) {
-      // Check if same person + name + spec + price already exists
       const existing = state.orders.find(o =>
         o.person === orderData.person &&
         o.name === orderData.name &&
@@ -1788,10 +1791,14 @@
           redirect: "follow"
         });
         if (!res.ok) throw new Error("HTTP " + res.status);
+        const result = await res.json();
+        if (result && result.status === "error") {
+          throw new Error(result.message || "Apps Script Error");
+        }
         setSyncBadge("ok", "雲端已同步");
       } catch (err) {
         console.warn("GAS POST warning:", err);
-        setSyncBadge("error", "同步重試中");
+        setSyncBadge("error", "同步異常");
       }
     }
 
@@ -1807,12 +1814,13 @@
 
     function resetDefaultGasUrl() {
       document.getElementById("gasUrlInput").value = DEFAULT_GAS_URL;
+      localStorage.removeItem(STORAGE_KEY_GAS_URL);
     }
 
     function saveGasUrlAndSync() {
       const url = document.getElementById("gasUrlInput").value.trim();
-      if (!url.startsWith("http")) {
-        showToast("請輸入有效的 https://script.google.com/... 網址");
+      if (!url.startsWith("http") || !url.includes("/exec")) {
+        showToast("請輸入有效的 /exec 結尾網頁應用程式網址");
         return;
       }
       state.gasUrl = url;
@@ -2206,6 +2214,13 @@
       renderMenus();
       renderAllSummaries();
       syncFromCloud(false);
+
+      // Auto-sync every 30 seconds while tab is visible
+      setInterval(() => {
+        if (!document.hidden) {
+          syncFromCloud(false);
+        }
+      }, 30000);
     });
   </script>
 </body>
