@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>築間幸福鍋物｜一般門市適用 雲端點餐與分帳</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ==================== 蘋果官網極簡美學設計系統變數 ==================== */
+    :root {
+      --bg-pure: #FFFFFF;
+      --bg-cool: #F5F5F7;
+      --text-primary: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary: #86868B;
+      --border-hairline: #E5E5EA;
+      --brand-crimson: #B81D24;
+      --brand-crimson-hover: #9B161C;
+      --brand-gold: #B38728;
+      --apple-ease: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", "SF Pro Text", "PingFang TC", "Noto Sans TC", sans-serif;
+      background-color: var(--bg-pure);
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* 等寬數字對齊：確保價格、份數與分帳金額精準齊平 */
+    .tabular-price {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 蘋果毛玻璃質感 */
+    .apple-glass {
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+    }
+
+    /* 隱藏橫向捲軸但保留流暢觸控滑動 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* 蘋果風格卡片與微互動 */
+    .apple-card {
+      background-color: #FFFFFF;
+      border-radius: 22px;
+      border: 1px solid var(--border-hairline);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+      transition: transform 0.35s var(--apple-ease), box-shadow 0.35s var(--apple-ease), border-color 0.35s var(--apple-ease);
+    }
+
+    @media (hover: hover) {
+      .apple-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+        border-color: #D1D1D6;
+      }
+    }
+
+    /* Segmented Control 膠囊切換按鈕 */
+    .segmented-btn {
+      transition: all 0.28s var(--apple-ease);
+    }
+    .segmented-btn.active {
+      background-color: #1D1D1F;
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+    }
+
+    /* 手機版漢堡選單抽屜動畫 */
+    .mobile-drawer-backdrop {
+      transition: opacity 0.3s var(--apple-ease);
+    }
+    .mobile-drawer-panel {
+      transition: transform 0.36s var(--apple-ease);
+    }
+
+    /* 輕量 Toast 提示動畫 */
+    .apple-toast {
+      transition: transform 0.32s var(--apple-ease), opacity 0.32s var(--apple-ease);
+    }
+  </style>
+</head>
+<body class="pb-24 sm:pb-0 selection:bg-[#B81D24]/15 selection:text-[#B81D24]">
+
+  <!-- ==================== 1. 頂部蘋果毛玻璃導覽列 ==================== -->
+  <header class="fixed top-0 inset-x-0 z-40 apple-glass border-b border-[#E5E5EA]">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
+      <!-- 品牌識別 -->
+      <a href="#top" class="flex items-center gap-2.5 group shrink-0">
+        <span class="w-7 h-7 rounded-lg bg-[#B81D24] text-white font-bold text-[14px] flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+          築
+        </span>
+        <div class="flex items-baseline gap-2">
+          <span class="font-bold text-[16px] tracking-tight text-[#1D1D1F]">築間幸福鍋物</span>
+          <span class="hidden md:inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#F5F5F7] text-[#6E6E73] border border-[#E5E5EA]">
+            一般門市適用
+          </span>
+        </div>
+      </a>
+
+      <!-- 桌機導覽連結 -->
+      <nav class="hidden lg:flex items-center gap-6 text-[13px] font-medium text-[#6E6E73]">
+        <a href="#rules" class="hover:text-[#1D1D1F] transition-colors">消費須知</a>
+        <a href="#soups" class="hover:text-[#1D1D1F] transition-colors">湯品湯底</a>
+        <a href="#sets" class="hover:text-[#1D1D1F] transition-colors">鍋物套餐</a>
+        <a href="#alacarte" class="hover:text-[#1D1D1F] transition-colors">單品加點</a>
+        <a href="#draft-cart" class="hover:text-[#1D1D1F] transition-colors">我的清單</a>
+        <a href="#cloud-summary" class="hover:text-[#1D1D1F] transition-colors">雲端分帳</a>
+      </nav>
+
+      <!-- 右側雲端連線狀態徽章 + 快速跳轉 + 手機選單 -->
+      <div class="flex items-center gap-2">
+        <!-- 雲端連線狀態按鈕（點擊可展開設定面板） -->
+        <button
+          id="headerCloudStatusBtn"
+          type="button"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#FBF8F1] text-[#9A6F18] border border-[#D4AF37]/40 hover:opacity-90 transition-all max-w-[190px] sm:max-w-none"
+          title="點擊開啟 Google 試算表連線設定"
+        >
+          <span id="headerStatusDot" class="w-2 h-2 rounded-full bg-[#D97706] shrink-0"></span>
+          <span id="headerStatusText" class="truncate">尚未設定雲端網址</span>
+        </button>
+
+        <!-- 前往雲端統計徽章 -->
+        <a
+          href="#cloud-summary"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[13px] font-semibold bg-[#1D1D1F] text-white hover:bg-[#333336] active:scale-[0.98] transition-all"
+        >
+          <span>全體統計</span>
+          <span id="headerCloudBadge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#B81D24] text-white tabular-price">
+            0份 $0
+          </span>
+        </a>
+
+        <!-- 手機版漢堡選單按鈕 (<640px) -->
+        <button
+          id="openMobileMenuBtn"
+          type="button"
+          class="sm:hidden w-9 h-9 rounded-full bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#E5E5EA] flex items-center justify-center transition-colors shrink-0"
+          aria-label="開啟導覽選單"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== 2. 手機版漢堡選單抽屜 (<640px) ==================== -->
+  <div id="mobileMenuDrawer" class="fixed inset-0 z-50 hidden sm:hidden" role="dialog" aria-modal="true" aria-label="行動導覽選單">
+    <div id="mobileMenuBackdrop" class="mobile-drawer-backdrop fixed inset-0 bg-black/35 backdrop-blur-xs opacity-0"></div>
+    <div id="mobileMenuPanel" class="mobile-drawer-panel fixed inset-y-0 right-0 w-72 max-w-[82vw] apple-glass border-l border-[#E5E5EA] shadow-2xl flex flex-col justify-between translate-x-full">
+      <div class="p-5">
+        <div class="flex items-center justify-between pb-4 border-b border-[#E5E5EA]">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-md bg-[#B81D24] text-white font-bold text-[12px] flex items-center justify-center">築</span>
+            <span class="font-bold text-[15px] text-[#1D1D1F]">築間幸福鍋物</span>
+          </div>
+          <button
+            id="closeMobileMenuBtn"
+            type="button"
+            class="w-8 h-8 rounded-full bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] flex items-center justify-center"
+            aria-label="關閉導覽選單"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 區塊快速跳轉 -->
+        <nav class="mt-5 space-y-1.5 text-[15px] font-medium text-[#1D1D1F]">
+          <a href="#top" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-[#F5F5F7] transition-colors">
+            <span>點餐四步驟與搜尋</span>
+            <span class="text-[#86868B] text-[12px]">→</span>
+          </a>
+          <a href="#rules" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-[#F5F5F7] transition-colors">
+            <span>消費與用餐須知</span>
+            <span class="text-[#86868B] text-[12px]">→</span>
+          </a>
+          <a href="#soups" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-[#F5F5F7] transition-colors">
+            <span>湯品（湯底加價）</span>
+            <span class="text-[#86868B] text-[12px]">17款</span>
+          </a>
+          <a href="#sets" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-[#F5F5F7] transition-colors">
+            <span>鍋物套餐</span>
+            <span class="text-[#86868B] text-[12px]">28款</span>
+          </a>
+          <a href="#alacarte" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-[#F5F5F7] transition-colors">
+            <span>單品加點</span>
+            <span class="text-[#86868B] text-[12px]">26款</span>
+          </a>
+          <a href="#draft-cart" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#FDF2F2] text-[#B81D24] font-semibold mt-2">
+            <span>步驟 A：我的待送出清單</span>
+            <span class="text-[12px]">查看</span>
+          </a>
+          <a href="#cloud-summary" class="mobile-nav-link flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#1D1D1F] text-white font-semibold">
+            <span>步驟 B：全體雲端分帳統計</span>
+            <span class="text-[#F5D78E] text-[12px]">查看</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="p-5 border-t border-[#E5E5EA] text-[12px] text-[#86868B]">
+        一般門市適用・內用酌收 10% 服務費
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. 置頂「個人點餐資訊與雲端連線」毛玻璃工作列 ==================== -->
+  <div class="sticky top-14 z-30 apple-glass border-b border-[#E5E5EA] shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+        <!-- 左側：點餐人姓名與備註即時輸入 -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 flex-1">
+          <div class="sm:col-span-5 flex items-center gap-2 bg-[#F5F5F7] rounded-xl px-3 py-1.5 border border-[#E5E5EA] focus-within:bg-white focus-within:border-[#B81D24] focus-within:ring-2 focus-within:ring-[#B81D24]/15 transition-all">
+            <span class="text-[12px] font-semibold text-[#B81D24] whitespace-nowrap">點餐人*</span>
+            <input
+              id="topOrdererInput"
+              type="text"
+              maxlength="20"
+              placeholder="輸入姓名（如：林學寬）"
+              class="w-full bg-transparent text-[#1D1D1F] placeholder-[#86868B] text-[14px] font-semibold focus:outline-none"
+            />
+          </div>
+
+          <div class="sm:col-span-7 flex items-center gap-2 bg-[#F5F5F7] rounded-xl px-3 py-1.5 border border-[#E5E5EA] focus-within:bg-white focus-within:border-[#1D1D1F] transition-all">
+            <span class="text-[12px] font-medium text-[#6E6E73] whitespace-nowrap">備註</span>
+            <input
+              id="topNoteInput"
+              type="text"
+              maxlength="40"
+              placeholder="選填（如：不要蔥、共鍋、副主餐選蛤蜊）"
+              class="w-full bg-transparent text-[#1D1D1F] placeholder-[#86868B] text-[14px] focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <!-- 右側：待送出清單快捷鈕 + 雲端連線設定折疊鈕 -->
+        <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+          <a
+            href="#draft-cart"
+            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-[13px] font-semibold bg-[#FDF2F2] text-[#B81D24] border border-[#B81D24]/25 hover:bg-[#B81D24] hover:text-white transition-all tabular-price"
+          >
+            <span>待送出清單</span>
+            <span id="topDraftBadge" class="font-bold">0份 $0</span>
+          </a>
+
+          <button
+            id="toggleCloudPanelBtn"
+            type="button"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[13px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#E5E5EA] transition-all"
+          >
+            <svg class="w-4 h-4 text-[#6E6E73]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+            <span>Google 試算表連線</span>
+            <svg id="cloudPanelChevron" class="w-3.5 h-3.5 text-[#86868B] transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== 可折疊 Google 試算表連線設定面板 ==================== -->
+      <div id="cloudConfigPanel" class="hidden mt-3 pt-3 border-t border-[#E5E5EA]">
+        <div class="bg-[#F5F5F7] rounded-2xl p-4 sm:p-5 border border-[#E5E5EA]">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3">
+            <div>
+              <h3 class="text-[15px] font-bold text-[#1D1D1F] flex items-center gap-2">
+                <span>Google 試算表雲端連線設定（Google Apps Script Web App）</span>
+              </h3>
+              <p class="text-[13px] text-[#6E6E73] mt-0.5">
+                貼上部署後的 <code class="px-1.5 py-0.5 rounded bg-white text-[#B81D24] border border-[#E5E5EA] text-[12px]">https://script.google.com/macros/s/.../exec</code> 網址，即可多人即時寫入與同步統計。
+              </p>
+            </div>
+            <div id="panelStatusBadge" class="self-start lg:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-[#FBF8F1] text-[#9A6F18] border border-[#D4AF37]/40">
+              <span id="panelStatusDot" class="w-2 h-2 rounded-full bg-[#D97706]"></span>
+              <span id="panelStatusText">尚未設定雲端網址（目前為本機暫存模式）</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              id="gasUrlInput"
+              type="url"
+              placeholder="請貼上 Google Apps Script 網頁應用程式網址..."
+              class="flex-1 px-3.5 py-2 rounded-xl bg-white text-[#1D1D1F] placeholder-[#86868B] text-[13px] border border-[#E5E5EA] focus:border-[#1D1D1F] focus:outline-none"
+            />
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                id="saveAndTestGasBtn"
+                type="button"
+                class="px-4 py-2 rounded-xl text-[13px] font-semibold bg-[#1D1D1F] text-white hover:bg-[#333336] active:scale-[0.98] transition-all"
+              >
+                儲存並測試連線
+              </button>
+              <button
+                id="copyShareLinkBtn"
+                type="button"
+                class="px-3.5 py-2 rounded-xl text-[13px] font-semibold bg-white text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#EBEBF0] transition-all"
+                title="產生內含雲端網址參數的專屬分享連結，傳給朋友點開免設定直接連線"
+              >
+                複製群組分享連結
+              </button>
+              <button
+                id="resetGasUrlBtn"
+                type="button"
+                class="px-3 py-2 rounded-xl text-[13px] font-medium bg-white text-[#6E6E73] border border-[#E5E5EA] hover:text-[#B81D24] transition-all"
+              >
+                重設
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 4. HERO 主視覺、點餐四步驟與全站即時搜尋列 ==================== -->
+  <main id="top" class="pt-20 sm:pt-24">
+    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pb-14 md:pb-20">
+      <div class="text-center max-w-3xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FBF8F1] border border-[#D4AF37]/40 text-[#9A6F18] text-[12px] font-semibold tracking-wide mb-4">
+          <span>JHUJIAN SHABU-SHABU</span>
+          <span class="text-[#D4AF37]">•</span>
+          <span>一般門市適用</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl md:text-[56px] font-bold tracking-[-0.025em] text-[#1D1D1F] leading-[1.12]">
+          築間幸福鍋物
+        </h1>
+        <p class="mt-3 text-[17px] sm:text-[20px] font-medium text-[#6E6E73] tracking-tight">
+          一般門市適用・雲端多人點餐與即時分帳系統
+        </p>
+      </div>
+
+      <!-- 點餐四步驟 Bento 卡片 -->
+      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="apple-card p-5 flex items-center gap-4 bg-[#F5F5F7]/65">
+          <div class="w-11 h-11 rounded-2xl bg-[#1D1D1F] text-white font-bold text-[15px] flex items-center justify-center shrink-0">
+            ①
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">Step 01</div>
+            <div class="text-[16px] font-bold text-[#1D1D1F] mt-0.5">選擇主餐</div>
+            <div class="text-[13px] text-[#6E6E73]">海陸牛豬雞鴨羊素食</div>
+          </div>
+        </div>
+
+        <div class="apple-card p-5 flex items-center gap-4 bg-[#F5F5F7]/65">
+          <div class="w-11 h-11 rounded-2xl bg-[#B81D24] text-white font-bold text-[15px] flex items-center justify-center shrink-0">
+            ②
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">Step 02</div>
+            <div class="text-[16px] font-bold text-[#1D1D1F] mt-0.5">選擇湯底</div>
+            <div class="text-[13px] text-[#6E6E73]">17 款招牌與特色湯品</div>
+          </div>
+        </div>
+
+        <div class="apple-card p-5 flex items-center gap-4 bg-[#F5F5F7]/65">
+          <div class="w-11 h-11 rounded-2xl bg-[#B38728] text-white font-bold text-[15px] flex items-center justify-center shrink-0">
+            ③
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">Step 03</div>
+            <div class="text-[16px] font-bold text-[#1D1D1F] mt-0.5">選擇附餐</div>
+            <div class="text-[13px] text-[#6E6E73]">依個人喜好自由搭配</div>
+          </div>
+        </div>
+
+        <div class="apple-card p-5 flex items-center gap-4 bg-[#F5F5F7]/65">
+          <div class="w-11 h-11 rounded-2xl bg-[#1E6B38] text-white font-bold text-[15px] flex items-center justify-center shrink-0">
+            ④
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-[#86868B]">Step 04</div>
+            <div class="text-[16px] font-bold text-[#1D1D1F] mt-0.5">無限取用野菜自助</div>
+            <div class="text-[13px] text-[#6E6E73]">蔬食、飲品、冰品甜點無限享</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 全站即時搜尋列 -->
+      <div class="mt-10 max-w-2xl mx-auto">
+        <div class="relative flex items-center">
+          <svg class="w-5 h-5 text-[#86868B] absolute left-4 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7" />
+            <path stroke-linecap="round" d="M20 20l-3.5-3.5" />
+          </svg>
+          <input
+            id="globalSearchInput"
+            type="text"
+            placeholder="搜尋菜名、備註或價格（例如：和牛、限定、熟食、奶蛋素、石頭湯底、420）"
+            class="w-full pl-12 pr-14 py-3.5 rounded-2xl bg-[#F5F5F7] text-[#1D1D1F] placeholder-[#86868B] text-[15px] border border-[#E5E5EA] focus:bg-white focus:border-[#1D1D1F] focus:ring-4 focus:ring-black/[0.04] focus:outline-none transition-all"
+          />
+          <button
+            id="clearSearchBtn"
+            type="button"
+            class="hidden absolute right-3.5 px-2.5 py-1 rounded-full text-[12px] font-semibold bg-[#E5E5EA] text-[#1D1D1F] hover:bg-[#D1D1D6] transition-colors"
+            aria-label="清除搜尋"
+          >
+            清除
+          </button>
+        </div>
+
+        <div id="searchStatusBar" class="hidden mt-2.5 text-center text-[13px] font-medium text-[#6E6E73] tabular-price">
+          共符合 <span id="searchMatchCount" class="font-bold text-[#B81D24]">0</span> 項餐點
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. 一、消費與用餐須知（APPLE BENTO GRID） ==================== -->
+    <section id="rules" class="bg-[#F5F5F7] py-16 md:py-24 border-y border-[#E5E5EA] scroll-mt-28">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <p class="text-[12px] font-semibold uppercase tracking-wider text-[#B81D24] mb-1.5">Dining Guidelines</p>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F]">
+              消費與用餐須知
+            </h2>
+          </div>
+
+          <button
+            id="toggleRulesBtn"
+            type="button"
+            class="self-start sm:self-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold bg-white text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#EBEBF0] transition-colors"
+            aria-expanded="true"
+          >
+            <span id="toggleRulesText">收合須知內容</span>
+            <svg id="toggleRulesIcon" class="w-4 h-4 transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- 四格蘋果資訊卡 -->
+        <div id="rulesGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- 卡片 1：身高計費標準 -->
+          <article class="apple-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FDF2F2] text-[#B81D24] text-[12px] font-semibold mb-3">
+                身高計費方式
+              </div>
+              <h3 class="text-[18px] font-bold text-[#1D1D1F] mb-3">身高收費標準</h3>
+              <ul class="space-y-2.5 text-[14px] text-[#6E6E73]">
+                <li class="flex items-start justify-between gap-2 pb-2 border-b border-[#E5E5EA]">
+                  <span>身高 140 公分（含）以上</span>
+                  <span class="font-semibold text-[#1D1D1F] text-right shrink-0">每人需點選乙份套餐</span>
+                </li>
+                <li class="flex items-start justify-between gap-2 pb-2 border-b border-[#E5E5EA]">
+                  <span>身高 121 公分–139 公分</span>
+                  <span class="font-semibold text-[#1D1D1F] tabular-price shrink-0">每人酌收 NT$300</span>
+                </li>
+                <li class="flex items-start justify-between gap-2 pb-2 border-b border-[#E5E5EA]">
+                  <span>身高 100 公分–120 公分</span>
+                  <span class="font-semibold text-[#1D1D1F] tabular-price shrink-0">每人酌收 NT$100</span>
+                </li>
+                <li class="flex items-start justify-between gap-2">
+                  <span>身高 99 公分（含）以下</span>
+                  <span class="font-semibold text-[#1E6B38] shrink-0">不另收費</span>
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- 卡片 2：用餐時間與服務費 -->
+          <article class="apple-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FBF8F1] text-[#9A6F18] text-[12px] font-semibold mb-3">
+                內用規範
+              </div>
+              <h3 class="text-[18px] font-bold text-[#1D1D1F] mb-3">用餐時間與服務費</h3>
+              <p class="text-[15px] text-[#1D1D1F] font-medium leading-relaxed">
+                用餐時間 <span class="text-[#B81D24] font-bold tabular-price">100 分鐘</span>，內用需酌收 <span class="text-[#B81D24] font-bold tabular-price">10% 服務費</span>。
+              </p>
+              <p class="mt-3 text-[14px] text-[#6E6E73] leading-relaxed">
+                套餐均提供醬料、飲料、冰淇淋、甜點／野菜自助吧無限取用；內用恕不提供自助吧食材打包服務。
+              </p>
+            </div>
+          </article>
+
+          <!-- 卡片 3：珍惜食材與外帶說明 -->
+          <article class="apple-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F5F5F7] text-[#515154] text-[12px] font-semibold mb-3">
+                惜食與外帶
+              </div>
+              <h3 class="text-[18px] font-bold text-[#1D1D1F] mb-3">剩食規範與外帶內容</h3>
+              <p class="text-[14px] text-[#6E6E73] leading-relaxed">
+                食材請適量取用，剩食超過 <span class="font-semibold text-[#1D1D1F] tabular-price">100g</span> 酌收 <span class="font-semibold text-[#B81D24] tabular-price">NT$200</span> 食材費用。
+              </p>
+              <p class="mt-3 text-[14px] text-[#6E6E73] leading-relaxed">
+                外帶（無內用）僅提供湯品、主食、高麗菜、附餐，免收服務費。
+              </p>
+            </div>
+          </article>
+
+          <!-- 卡片 4：優惠與過敏原提醒 -->
+          <article class="apple-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F1F8F3] text-[#1E6B38] text-[12px] font-semibold mb-3">
+                貼心提醒
+              </div>
+              <h3 class="text-[18px] font-bold text-[#1D1D1F] mb-3">優惠活動與過敏原</h3>
+              <p class="text-[14px] text-[#6E6E73] leading-relaxed">
+                優惠活動恕不得合併使用；用餐前可向現場服務人員確認菜單是否含過敏原成分（圖片僅供參考，餐點以現場供應為主）。
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 6. 二、湯品（湯底加價，共 17 項） ==================== -->
+    <section id="soups" class="bg-white py-16 md:py-24 scroll-mt-28">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-8">
+          <div>
+            <p class="text-[12px] font-semibold uppercase tracking-wider text-[#B81D24] mb-1.5">Step 02 • Soup Bases</p>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F]">
+              湯品（湯底加價）
+            </h2>
+            <p class="mt-1.5 text-[15px] text-[#6E6E73]">共 17 項匠心熬製湯底，點擊「+ 加入」放入我的待送出清單。</p>
+          </div>
+
+          <div id="soupFilterGroup" class="inline-flex p-1 rounded-full bg-[#F5F5F7] border border-[#E5E5EA] overflow-x-auto no-scrollbar max-w-full">
+            <button type="button" data-soup-filter="all" class="segmented-btn active px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap">
+              全部 (17)
+            </button>
+            <button type="button" data-soup-filter="non-spicy" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              不辣 (12)
+            </button>
+            <button type="button" data-soup-filter="spicy" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              辣味 (5)
+            </button>
+            <button type="button" data-soup-filter="meat" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              含肉品 (2)
+            </button>
+          </div>
+        </div>
+
+        <div id="soupGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+    </section>
+
+    <!-- ==================== 7. 三、鍋物套餐（共 28 項） ==================== -->
+    <section id="sets" class="bg-[#F5F5F7] py-16 md:py-24 border-y border-[#E5E5EA] scroll-mt-28">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-8">
+          <div>
+            <p class="text-[12px] font-semibold uppercase tracking-wider text-[#B81D24] mb-1.5">Step 01 • Hot Pot Sets</p>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F]">
+              鍋物套餐
+            </h2>
+            <p class="mt-1.5 text-[15px] text-[#6E6E73]">共 28 項嚴選海陸主餐套餐，大／小份量可獨立加入。</p>
+          </div>
+
+          <div id="setFilterGroup" class="inline-flex p-1 rounded-full bg-white border border-[#E5E5EA] overflow-x-auto no-scrollbar max-w-full shadow-2xs">
+            <button type="button" data-set-filter="all" class="segmented-btn active px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap">
+              全部 (28)
+            </button>
+            <button type="button" data-set-filter="海鮮火鍋套餐" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              海鮮 (8)
+            </button>
+            <button type="button" data-set-filter="牛肉火鍋套餐" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              牛肉 (10)
+            </button>
+            <button type="button" data-set-filter="豬肉火鍋套餐" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              豬肉 (5)
+            </button>
+            <button type="button" data-set-filter="雞・鴨・羊・素食火鍋套餐" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              雞・鴨・羊・素食 (5)
+            </button>
+          </div>
+        </div>
+
+        <div id="setsContainer" class="space-y-12"></div>
+      </div>
+    </section>
+
+    <!-- ==================== 8. 四、單品加點（共 26 項） ==================== -->
+    <section id="alacarte" class="bg-white py-16 md:py-24 scroll-mt-28">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-8">
+          <div>
+            <p class="text-[12px] font-semibold uppercase tracking-wider text-[#B38728] mb-1.5">À La Carte • Add-Ons</p>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F]">
+              單品加點
+            </h2>
+            <p class="mt-1.5 text-[15px] text-[#6E6E73]">共 26 項頂級肉品與產地直送海鮮加點。</p>
+          </div>
+
+          <div id="alacarteFilterGroup" class="inline-flex p-1 rounded-full bg-[#F5F5F7] border border-[#E5E5EA] overflow-x-auto no-scrollbar max-w-full">
+            <button type="button" data-alacarte-filter="all" class="segmented-btn active px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap">
+              全部 (26)
+            </button>
+            <button type="button" data-alacarte-filter="牛肉" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              牛肉 (9)
+            </button>
+            <button type="button" data-alacarte-filter="豬肉" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              豬肉 (4)
+            </button>
+            <button type="button" data-alacarte-filter="羊／雞／鴨" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              羊／雞／鴨 (4)
+            </button>
+            <button type="button" data-alacarte-filter="海鮮" class="segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap">
+              海鮮 (9)
+            </button>
+          </div>
+        </div>
+
+        <div id="alacarteContainer" class="space-y-12"></div>
+      </div>
+    </section>
+
+    <!-- ==================== 9. 步驟 A：個人選餐（待送出清單） ==================== -->
+    <section id="draft-cart" class="bg-[#F5F5F7] py-16 md:py-20 border-t border-[#E5E5EA] scroll-mt-28">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FDF2F2] text-[#B81D24] text-[12px] font-semibold mb-2">
+            步驟 A • 個人選餐
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-[#1D1D1F]">
+            我的待送出清單
+          </h2>
+          <p class="mt-1 text-[15px] text-[#6E6E73]">
+            確認點餐人姓名與餐點數量後，點擊送出即可寫入 Google 試算表與大家同步彙整。
+          </p>
+        </div>
+
+        <div class="bg-white rounded-[24px] p-5 sm:p-8 border border-[#E5E5EA] shadow-2xs">
+          <!-- 點餐人姓名與備註（與頂部列雙向同步） -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-6 border-b border-[#E5E5EA]">
+            <div>
+              <label for="draftOrdererInput" class="block text-[13px] font-bold text-[#1D1D1F] mb-1.5">
+                點餐人姓名 <span class="text-[#B81D24]">*必填</span>
+              </label>
+              <input
+                id="draftOrdererInput"
+                type="text"
+                maxlength="20"
+                placeholder="請輸入您的姓名（例如：林學寬、陳中興）"
+                class="w-full px-4 py-2.5 rounded-xl bg-[#F5F5F7] text-[#1D1D1F] placeholder-[#86868B] text-[15px] font-semibold border border-[#E5E5EA] focus:bg-white focus:border-[#B81D24] focus:ring-2 focus:ring-[#B81D24]/15 focus:outline-none transition-all"
+              />
+            </div>
+
+            <div>
+              <label for="draftNoteInput" class="block text-[13px] font-bold text-[#1D1D1F] mb-1.5">
+                備註 <span class="text-[#86868B] font-normal">（選填）</span>
+              </label>
+              <input
+                id="draftNoteInput"
+                type="text"
+                maxlength="40"
+                placeholder="例如：不要蔥、共鍋、副主餐選蛤蜊"
+                class="w-full px-4 py-2.5 rounded-xl bg-[#F5F5F7] text-[#1D1D1F] placeholder-[#86868B] text-[15px] border border-[#E5E5EA] focus:bg-white focus:border-[#1D1D1F] focus:outline-none transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- 智慧提醒：經典老饕石頭爆量鍋僅限搭配招牌石頭湯底 -->
+          <div id="draftStoneTip" class="hidden mt-5 px-4 py-3 rounded-2xl bg-[#FBF8F1] border border-[#D4AF37]/45 text-[13px] text-[#8C6718] flex items-center gap-2.5">
+            <span class="text-base shrink-0">💡</span>
+            <span>貼心提醒：您的待送出清單中含有「經典老饕石頭爆量鍋」，該套餐僅限搭配「招牌石頭湯底」。</span>
+          </div>
+
+          <!-- 待送出清單項目列表 -->
+          <div id="draftItemsContainer" class="mt-6"></div>
+
+          <!-- 底部送出操作區 -->
+          <div class="mt-6 pt-6 border-t border-[#E5E5EA] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="text-[13px] text-[#6E6E73]">
+                待送出餐點共 <strong id="draftTotalQty" class="text-[#1D1D1F] tabular-price">0</strong> 份
+              </div>
+              <div class="text-[22px] font-bold text-[#1D1D1F] tabular-price mt-0.5">
+                餐點小計：<span id="draftSubtotal" class="text-[#B81D24]">NT$0</span>
+                <span class="text-[12px] font-normal text-[#86868B]">（服務費依下方內用/外帶設定計算）</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button
+                id="clearDraftBtn"
+                type="button"
+                class="px-4 py-3 rounded-full text-[13px] font-semibold bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#E5E5EA] transition-all"
+              >
+                清空待送出清單
+              </button>
+
+              <button
+                id="submitOrderBtn"
+                type="button"
+                class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[15px] font-bold bg-[#B81D24] text-white hover:bg-[#9B161C] active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <span id="submitOrderBtnText">送出訂單至 Google 試算表</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 10. 步驟 B：全體雲端點餐統計（自動彙整所有點餐人） ==================== -->
+    <section id="cloud-summary" class="bg-white py-16 md:py-24 border-t border-[#E5E5EA] scroll-mt-28">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- 標題與雲端重新整理 / 複製工具列 -->
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-8">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1D1D1F] text-white text-[12px] font-semibold mb-2">
+              步驟 B • 全體雲端點餐統計
+            </div>
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F]">
+              全體點餐人統計與分帳總表
+            </h2>
+            <p class="mt-1.5 text-[15px] text-[#6E6E73]">
+              自動彙整試算表內所有點餐人的品項、數量與分帳金額。
+              <span id="lastSyncedLabel" class="text-[13px] text-[#86868B] ml-1"></span>
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button
+              id="refreshCloudBtn"
+              type="button"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] border border-[#E5E5EA] hover:bg-[#E5E5EA] active:scale-[0.98] transition-all"
+            >
+              <svg id="refreshCloudIcon" class="w-4 h-4 text-[#1D1D1F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span id="refreshCloudText">重新整理雲端紀錄</span>
+            </button>
+
+            <button
+              id="copyCloudSummaryBtn"
+              type="button"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-[13px] font-semibold bg-[#1D1D1F] text-white hover:bg-[#333336] active:scale-[0.98] transition-all shadow-xs"
+            >
+              <svg class="w-4 h-4 text-[#F5D78E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+              </svg>
+              <span>一鍵複製分帳統計明細</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 雙控制列：內用/外帶切換 + 依點餐人/依品項視圖切換 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div class="inline-flex p-1 rounded-full bg-[#F5F5F7] border border-[#E5E5EA] self-start overflow-x-auto no-scrollbar max-w-full">
+            <button
+              type="button"
+              data-dining-mode="dine-in"
+              class="dining-mode-btn segmented-btn active px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap"
+            >
+              內用（加收 10% 服務費）
+            </button>
+            <button
+              type="button"
+              data-dining-mode="takeout"
+              class="dining-mode-btn segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap"
+            >
+              外帶（免收服務費）
+            </button>
+          </div>
+
+          <div class="inline-flex p-1 rounded-full bg-[#F5F5F7] border border-[#E5E5EA] self-start overflow-x-auto no-scrollbar max-w-full">
+            <button
+              type="button"
+              data-stats-view="by-person"
+              class="stats-view-btn segmented-btn active px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap"
+            >
+              依點餐人統計（分帳總表 ＋ 個人明細卡片）
+            </button>
+            <button
+              type="button"
+              data-stats-view="by-item"
+              class="stats-view-btn segmented-btn px-4 py-1.5 rounded-full text-[13px] font-medium text-[#6E6E73] hover:text-[#1D1D1F] whitespace-nowrap"
+            >
+              依品項彙整（向店家點餐用）
+            </button>
+          </div>
+        </div>
+
+        <!-- 雲端統計主容器 -->
+        <div id="cloudStatsContainer"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== 11. 蘋果極簡頁尾 ==================== -->
+  <footer class="bg-[#F5F5F7] border-t border-[#E5E5EA] py-12 text-[#6E6E73] text-[13px]">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E5EA]">
+        <div class="font-bold text-[#1D1D1F] text-[15px]">築間幸福鍋物｜一般門市適用</div>
+        <div class="flex flex-wrap gap-5">
+          <a href="#rules" class="hover:text-[#1D1D1F] transition-colors">消費與用餐須知</a>
+          <a href="#soups" class="hover:text-[#1D1D1F] transition-colors">湯品湯底</a>
+          <a href="#sets" class="hover:text-[#1D1D1F] transition-colors">鍋物套餐</a>
+          <a href="#alacarte" class="hover:text-[#1D1D1F] transition-colors">單品加點</a>
+          <a href="#draft-cart" class="hover:text-[#1D1D1F] transition-colors">我的待送出清單</a>
+          <a href="#cloud-summary" class="hover:text-[#1D1D1F] transition-colors">全體雲端分帳</a>
+        </div>
+      </div>
+      <p class="text-[12px] text-[#86868B] leading-relaxed">
+        用餐時間 100 分鐘，內用需酌收 10% 服務費；外帶（無內用）僅提供湯品、主食、高麗菜、附餐，免收服務費。圖片僅供參考，餐點以現場供應為主。
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== 12. 手機版底部懸浮即時點餐摘要列 (<640px) ==================== -->
+  <div class="sm:hidden fixed bottom-3 inset-x-3 z-30">
+    <div class="flex items-center justify-between gap-2 px-4 py-3 rounded-2xl bg-[#1D1D1F]/95 backdrop-blur-md text-white shadow-[0_12px_32px_rgba(0,0,0,0.24)] border border-white/10">
+      <a href="#draft-cart" class="min-w-0 flex-1">
+        <div class="text-[11px] text-white/70">我的待送出清單</div>
+        <div id="mobileFloatDraft" class="text-[14px] font-bold text-white tabular-price truncate">
+          0份 $0
+        </div>
+      </a>
+
+      <div class="h-7 w-[1px] bg-white/15 shrink-0"></div>
+
+      <a href="#cloud-summary" class="min-w-0 flex-1 text-right">
+        <div id="mobileFloatCloudMode" class="text-[11px] text-white/70">全體統計・內用10%</div>
+        <div id="mobileFloatCloudTotal" class="text-[15px] font-bold text-[#F5D78E] tabular-price truncate">
+          NT$0
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ==================== 13. Apple 風格 Toast 輕量提示 ==================== -->
+  <div
+    id="appleToast"
+    class="apple-toast fixed top-20 left-1/2 -translate-x-1/2 -translate-y-6 opacity-0 pointer-events-none z-50 px-4 py-2.5 rounded-full bg-[#1D1D1F]/95 backdrop-blur-md text-white text-[13px] font-medium shadow-lg border border-white/10 flex items-center gap-2 whitespace-nowrap max-w-[92vw]"
+  >
+    <span id="appleToastDot" class="w-2 h-2 rounded-full bg-[#34C759] shrink-0"></span>
+    <span id="appleToastText" class="truncate">操作完成</span>
+  </div>
+
+  <!-- ==================== 14. 完整菜單資料與雲端試算表串接核心腳本 ==================== -->
+  <script>
+    // ==================== 【重要設定】Google Apps Script 網頁應用程式網址 ====================
+    // 部署 Google Apps Script 後，可將產生的 https://script.google.com/macros/s/.../exec 貼在下方引號內：
+    const DEFAULT_GAS_URL = ""; // 請在此貼上您的 Google Apps Script 網頁應用程式網址
+
+    // ==================== 完整菜單資料庫（17款湯品 + 28款鍋物套餐 + 26款單品加點） ====================
+    const MENU_DATA = {
+      // 二、湯品（湯底加價，共 17 項）
+      soups: [
+        { id: 'soup-1', name: '招牌石頭湯底', price: 25, priceText: '$25', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-2', name: '招牌石頭湯底', price: 40, priceText: '$40', remark: '加乾魷魚一份', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-3', name: '日本九州辛味噌', price: 50, priceText: '$50', remark: '辣度 1 級', spiceLevel: 1, hasMeat: false },
+        { id: 'soup-4', name: '秘煉老熬牛髓湯', price: 50, priceText: '$50', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-5', name: '海鮮干貝湯', price: 50, priceText: '$50', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-6', name: '九州蒜香豚骨湯', price: 60, priceText: '$60', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-7', name: '韓式泡菜湯底', price: 60, priceText: '$60', remark: '辣度 1 級', spiceLevel: 1, hasMeat: false },
+        { id: 'soup-8', name: '粵式胡椒豬骨湯', price: 70, priceText: '$70', remark: '辣度 1 級', spiceLevel: 1, hasMeat: false },
+        { id: 'soup-9', name: '川味麻辣湯底', price: 80, priceText: '$80', remark: '辣度 3 級', spiceLevel: 3, hasMeat: false },
+        { id: 'soup-10', name: '鮮菇奶香湯', price: 80, priceText: '$80', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-11', name: '養生藥膳湯', price: 80, priceText: '$80', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-12', name: '石頭藥膳湯', price: 90, priceText: '$90', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-13', name: '老佛爺御膳湯', price: 90, priceText: '$90', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-14', name: '麻辣奶香湯', price: 90, priceText: '$90', remark: '辣度 2 級', spiceLevel: 2, hasMeat: false },
+        { id: 'soup-15', name: '松露金鑽雞湯', price: 90, priceText: '$90', remark: '—', spiceLevel: 0, hasMeat: false },
+        { id: 'soup-16', name: '麻油雞湯', price: 90, priceText: '$90', remark: '內含雞腿肉', spiceLevel: 0, hasMeat: true },
+        { id: 'soup-17', name: '剝皮辣椒雞湯', price: 90, priceText: '$90', remark: '內含雞腿肉', spiceLevel: 0, hasMeat: true }
+      ],
+
+      // 三、鍋物套餐（共 28 項）
+      sets: [
+        // 海鮮火鍋套餐 (8)
+        { id: 'set-sf-1', category: '海鮮火鍋套餐', name: '龍王鍋', priceText: '$1,080', prices: [{ label: '', value: 1080 }], remark: '肉品擇一：雪花牛／梅花豬／羊肉' },
+        { id: 'set-sf-2', category: '海鮮火鍋套餐', name: '海陸總匯鍋', priceText: '$780', prices: [{ label: '', value: 780 }], remark: '肉品擇一：熟成低脂牛／雪花牛／梅花豬' },
+        { id: 'set-sf-3', category: '海鮮火鍋套餐', name: '巨無霸草蝦鍋', priceText: '$680', prices: [{ label: '', value: 680 }], remark: '副主餐擇一：蛤蜊／鮮蚵／魚片／牛肉／豬肉／羊肉' },
+        { id: 'set-sf-4', category: '海鮮火鍋套餐', name: '海鮮總匯鍋', priceText: '$680', prices: [{ label: '', value: 680 }], remark: '—' },
+        { id: 'set-sf-5', category: '海鮮火鍋套餐', name: '蛤蜊草蝦鍋', priceText: '$520', prices: [{ label: '', value: 520 }], remark: '—' },
+        { id: 'set-sf-6', category: '海鮮火鍋套餐', name: '特選鮭魚鍋', priceText: '$500', prices: [{ label: '', value: 500 }], remark: '—' },
+        { id: 'set-sf-7', category: '海鮮火鍋套餐', name: '綜合魚片鍋', priceText: '$450', prices: [{ label: '', value: 450 }], remark: '—' },
+        { id: 'set-sf-8', category: '海鮮火鍋套餐', name: '潮鯛魚片鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '—' },
+
+        // 牛肉火鍋套餐 (10)
+        { id: 'set-bf-1', category: '牛肉火鍋套餐', name: '日本A5和牛鍋', priceText: '$1,580', prices: [{ label: '', value: 1580 }], remark: '限定品項' },
+        { id: 'set-bf-2', category: '牛肉火鍋套餐', name: '極上無骨牛小排鍋', priceText: '$980', prices: [{ label: '', value: 980 }], remark: '雙倍：濕式熟成牛小排' },
+        { id: 'set-bf-3', category: '牛肉火鍋套餐', name: 'M9+黑毛和牛霜降鍋', priceText: '$880', prices: [{ label: '', value: 880 }], remark: '—' },
+        { id: 'set-bf-4', category: '牛肉火鍋套餐', name: '美國極上熟成雪花牛肉鍋', priceText: '$680', prices: [{ label: '', value: 680 }], remark: '—' },
+        { id: 'set-bf-5', category: '牛肉火鍋套餐', name: '美國濕式熟成霜降牛肉鍋', priceText: '(大) $620 / (小) $520', prices: [{ label: '大', value: 620 }, { label: '小', value: 520 }], remark: '—' },
+        { id: 'set-bf-6', category: '牛肉火鍋套餐', name: '草飼熟成菲力牛肉鍋', priceText: '(大) $620 / (小) $520', prices: [{ label: '大', value: 620 }, { label: '小', value: 520 }], remark: '限定品項' },
+        { id: 'set-bf-7', category: '牛肉火鍋套餐', name: '美國冷藏濕式熟成板腱牛肉鍋', priceText: '(大) $550 / (小) $480', prices: [{ label: '大', value: 550 }, { label: '小', value: 480 }], remark: '限定品項' },
+        { id: 'set-bf-8', category: '牛肉火鍋套餐', name: '經典老饕石頭爆量牛肉鍋', priceText: '$500', prices: [{ label: '', value: 500 }], remark: '限定品項；僅限搭配招牌石頭湯底' },
+        { id: 'set-bf-9', category: '牛肉火鍋套餐', name: '草飼熟成低脂牛肉鍋', priceText: '$450', prices: [{ label: '', value: 450 }], remark: '—' },
+        { id: 'set-bf-10', category: '牛肉火鍋套餐', name: '美國冷藏濕式熟成牛五花鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '—' },
+
+        // 豬肉火鍋套餐 (5)
+        { id: 'set-pk-1', category: '豬肉火鍋套餐', name: '西班牙伊比利豬肉鍋', priceText: '$680', prices: [{ label: '', value: 680 }], remark: '限定品項' },
+        { id: 'set-pk-2', category: '豬肉火鍋套餐', name: '松阪豬肉鍋', priceText: '(大) $620 / (小) $520', prices: [{ label: '大', value: 620 }, { label: '小', value: 520 }], remark: '僅供熟食' },
+        { id: 'set-pk-3', category: '豬肉火鍋套餐', name: '經典老饕石頭爆量豬肉鍋', priceText: '$480', prices: [{ label: '', value: 480 }], remark: '僅限搭配招牌石頭湯底' },
+        { id: 'set-pk-4', category: '豬肉火鍋套餐', name: '台灣嚴選雪花豬肉鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '—' },
+        { id: 'set-pk-5', category: '豬肉火鍋套餐', name: '梅花豬肉鍋', priceText: '$400', prices: [{ label: '', value: 400 }], remark: '—' },
+
+        // 雞・鴨・羊・素食火鍋套餐 (5)
+        { id: 'set-ot-1', category: '雞・鴨・羊・素食火鍋套餐', name: '紐西蘭嫩羊肩鍋', priceText: '$500', prices: [{ label: '', value: 500 }], remark: '—' },
+        { id: 'set-ot-2', category: '雞・鴨・羊・素食火鍋套餐', name: '特選羊肉鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '僅供熟食' },
+        { id: 'set-ot-3', category: '雞・鴨・羊・素食火鍋套餐', name: '現流鮮嫩雞腿排鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '—' },
+        { id: 'set-ot-4', category: '雞・鴨・羊・素食火鍋套餐', name: '櫻桃鴨肉鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '僅供熟食；副主餐擇一：蛤蜊／鯛魚片' },
+        { id: 'set-ot-5', category: '雞・鴨・羊・素食火鍋套餐', name: '素食鍋', priceText: '$420', prices: [{ label: '', value: 420 }], remark: '奶蛋素' }
+      ],
+
+      // 四、單品加點（共 26 項）
+      alacarte: [
+        // 牛肉 (9)
+        { id: 'ala-bf-1', category: '牛肉', name: '日本A5和牛', price: 1480, priceText: '$1,480', remark: '限定品項' },
+        { id: 'ala-bf-2', category: '牛肉', name: '極上無骨牛小排', price: 880, priceText: '$880', remark: '—' },
+        { id: 'ala-bf-3', category: '牛肉', name: 'M9+黑毛和牛霜降', price: 780, priceText: '$780', remark: '限定品項' },
+        { id: 'ala-bf-4', category: '牛肉', name: '美國極上熟成雪花牛肉', price: 580, priceText: '$580', remark: '—' },
+        { id: 'ala-bf-5', category: '牛肉', name: '美國濕式熟成霜降牛肉', price: 420, priceText: '$420', remark: '—' },
+        { id: 'ala-bf-6', category: '牛肉', name: '草飼熟成菲力牛肉', price: 420, priceText: '$420', remark: '—' },
+        { id: 'ala-bf-7', category: '牛肉', name: '美國冷藏濕式熟成板腱牛肉', price: 380, priceText: '$380', remark: '—' },
+        { id: 'ala-bf-8', category: '牛肉', name: '草飼熟成低脂牛肉', price: 350, priceText: '$350', remark: '—' },
+        { id: 'ala-bf-9', category: '牛肉', name: '美國冷藏濕式熟成牛五花', price: 320, priceText: '$320', remark: '—' },
+
+        // 豬肉 (4)
+        { id: 'ala-pk-1', category: '豬肉', name: '西班牙伊比利豬肉', price: 580, priceText: '$580', remark: '限定品項' },
+        { id: 'ala-pk-2', category: '豬肉', name: '松阪豬肉', price: 420, priceText: '$420', remark: '僅供熟食' },
+        { id: 'ala-pk-3', category: '豬肉', name: '台灣嚴選雪花豬肉', price: 320, priceText: '$320', remark: '—' },
+        { id: 'ala-pk-4', category: '豬肉', name: '梅花豬肉', price: 300, priceText: '$300', remark: '—' },
+
+        // 羊／雞／鴨 (4)
+        { id: 'ala-ot-1', category: '羊／雞／鴨', name: '紐西蘭嫩羊肩', price: 400, priceText: '$400', remark: '—' },
+        { id: 'ala-ot-2', category: '羊／雞／鴨', name: '特選羊肉', price: 320, priceText: '$320', remark: '僅供熟食' },
+        { id: 'ala-ot-3', category: '羊／雞／鴨', name: '現流鮮嫩雞腿排', price: 320, priceText: '$320', remark: '—' },
+        { id: 'ala-ot-4', category: '羊／雞／鴨', name: '櫻桃鴨肉', price: 320, priceText: '$320', remark: '僅供熟食' },
+
+        // 海鮮 (9)
+        { id: 'ala-sf-1', category: '海鮮', name: '海鮮總匯', price: 580, priceText: '$580', remark: '—' },
+        { id: 'ala-sf-2', category: '海鮮', name: '巨無霸草蝦', price: 420, priceText: '$420', remark: '—' },
+        { id: 'ala-sf-3', category: '海鮮', name: '特選鮭魚片', price: 400, priceText: '$400', remark: '—' },
+        { id: 'ala-sf-4', category: '海鮮', name: '綜合魚片', price: 350, priceText: '$350', remark: '—' },
+        { id: 'ala-sf-5', category: '海鮮', name: '潮鯛魚片', price: 320, priceText: '$320', remark: '—' },
+        { id: 'ala-sf-6', category: '海鮮', name: '北海道大干貝', price: 300, priceText: '$300', remark: '—' },
+        { id: 'ala-sf-7', category: '海鮮', name: '草蝦', price: 280, priceText: '$280', remark: '—' },
+        { id: 'ala-sf-8', category: '海鮮', name: '生蠔', price: 150, priceText: '$150', remark: '嚴禁生食、僅供熟食' },
+        {
+          id: 'ala-sf-9',
+          category: '海鮮',
+          name: '軟絲／鮮蝦／鮮蚵／蛤蜊',
+          price: 120,
+          priceText: '各 $120',
+          remark: '每份計價',
+          options: ['軟絲', '鮮蝦', '鮮蚵', '蛤蜊']
+        }
+      ]
+    };
+
+    // ==================== 應用程式狀態與儲存鍵值 ====================
+    const STORAGE_KEYS = {
+      GAS_URL: 'jhujian_cloud_gas_url_v1',
+      ORDERER_NAME: 'jhujian_last_orderer_name_v1',
+      DRAFT_CART: 'jhujian_draft_cart_v1',
+      LOCAL_ORDERS: 'jhujian_local_fallback_orders_v1',
+      DINING_MODE: 'jhujian_dining_mode_v1'
+    };
+
+    const state = {
+      gasUrl: '',
+      isCloudConnected: false,
+      isSyncing: false,
+      lastSyncedAt: '',
+      searchQuery: '',
+      soupFilter: 'all',
+      setFilter: 'all',
+      alacarteFilter: 'all',
+      ordererName: '',
+      orderNote: '',
+      draftCart: [], // [{ itemKey, name, categoryLabel, unitPrice, qty }]
+      cloudOrders: [], // [{ id, timestamp, orderer, category, name, unitPrice, qty, subtotal, note }]
+      isDineIn: true, // true: 內用 (+10% 服務費), false: 外帶 (免收服務費)
+      statsView: 'by-person', // 'by-person' | 'by-item'
+      confirmDeleteTarget: null // 用於兩段式安全刪除確認
+    };
+
+    /**
+     * 安全跳脫 HTML 特殊字元
+     */
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * 顯示 Apple 風格輕量 Toast 提示
+     */
+    let toastTimer = null;
+    function showToast(message, type = 'success') {
+      const toastEl = document.getElementById('appleToast');
+      const dotEl = document.getElementById('appleToastDot');
+      const textEl = document.getElementById('appleToastText');
+
+      textEl.textContent = message;
+      if (type === 'error') {
+        dotEl.className = 'w-2 h-2 rounded-full bg-[#FF3B30] shrink-0';
+      } else if (type === 'warn') {
+        dotEl.className = 'w-2 h-2 rounded-full bg-[#FF9500] shrink-0';
+      } else {
+        dotEl.className = 'w-2 h-2 rounded-full bg-[#34C759] shrink-0';
+      }
+
+      toastEl.classList.remove('-translate-y-6', 'opacity-0');
+      toastEl.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.add('-translate-y-6', 'opacity-0');
+        toastEl.classList.remove('translate-y-0', 'opacity-100');
+      }, 2800);
+    }
+
+    // ==================== 雲端連線設定與狀態管理 ====================
+
+    /**
+     * 解析 GAS 網址（優先順序：URL ?api= 參數 > localStorage > DEFAULT_GAS_URL）
+     */
+    function resolveInitialGasUrl() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const paramApi = (params.get('api') || '').trim();
+        if (paramApi && paramApi.startsWith('http')) {
+          localStorage.setItem(STORAGE_KEYS.GAS_URL, paramApi);
+          return paramApi;
+        }
+      } catch (err) {
+        // 忽略網址參數解析例外
+      }
+
+      try {
+        const savedUrl = (localStorage.getItem(STORAGE_KEYS.GAS_URL) || '').trim();
+        if (savedUrl) return savedUrl;
+      } catch (err) {
+        // 忽略 localStorage 讀取例外
+      }
+
+      return (DEFAULT_GAS_URL || '').trim();
+    }
+
+    /**
+     * 更新網頁上所有雲端連線狀態徽章與按鈕文字
+     */
+    function updateCloudConnectionUI() {
+      const hasUrl = Boolean(state.gasUrl);
+
+      const headerBtn = document.getElementById('headerCloudStatusBtn');
+      const headerDot = document.getElementById('headerStatusDot');
+      const headerText = document.getElementById('headerStatusText');
+
+      const panelBadge = document.getElementById('panelStatusBadge');
+      const panelDot = document.getElementById('panelStatusDot');
+      const panelText = document.getElementById('panelStatusText');
+
+      const submitBtnText = document.getElementById('submitOrderBtnText');
+
+      if (hasUrl && state.isCloudConnected) {
+        headerBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#F1F8F3] text-[#1E6B38] border border-[#1E6B38]/25 hover:opacity-90 transition-all max-w-[190px] sm:max-w-none';
+        headerDot.className = 'w-2 h-2 rounded-full bg-[#34C759] shrink-0';
+        headerText.textContent = '已連線雲端試算表';
+
+        panelBadge.className = 'self-start lg:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-[#F1F8F3] text-[#1E6B38] border border-[#1E6B38]/25';
+        panelDot.className = 'w-2 h-2 rounded-full bg-[#34C759]';
+        panelText.textContent = '已連線雲端試算表（多人即時同步中）';
+
+        submitBtnText.textContent = '送出訂單至 Google 試算表';
+      } else if (hasUrl && !state.isCloudConnected) {
+        headerBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#FDF2F2] text-[#B81D24] border border-[#B81D24]/25 hover:opacity-90 transition-all max-w-[190px] sm:max-w-none';
+        headerDot.className = 'w-2 h-2 rounded-full bg-[#FF3B30] shrink-0';
+        headerText.textContent = '雲端連線異常';
+
+        panelBadge.className = 'self-start lg:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-[#FDF2F2] text-[#B81D24] border border-[#B81D24]/25';
+        panelDot.className = 'w-2 h-2 rounded-full bg-[#FF3B30]';
+        panelText.textContent = '無法連線至該網址，請檢查部署權限是否設為「所有人」';
+
+        submitBtnText.textContent = '送出訂單至 Google 試算表';
+      } else {
+        headerBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#FBF8F1] text-[#9A6F18] border border-[#D4AF37]/40 hover:opacity-90 transition-all max-w-[190px] sm:max-w-none';
+        headerDot.className = 'w-2 h-2 rounded-full bg-[#D97706] shrink-0';
+        headerText.textContent = '尚未設定雲端網址';
+
+        panelBadge.className = 'self-start lg:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold bg-[#FBF8F1] text-[#9A6F18] border border-[#D4AF37]/40';
+        panelDot.className = 'w-2 h-2 rounded-full bg-[#D97706]';
+        panelText.textContent = '尚未設定雲端網址（目前為本機暫存模式）';
+
+        submitBtnText.textContent = '加入本機統計（尚未設定雲端網址）';
+      }
+    }
+
+    /**
+     * 從 Google 試算表（或本機暫存）載入所有點餐紀錄
+     */
+    async function fetchCloudOrders(showFeedback = false) {
+      const refreshIcon = document.getElementById('refreshCloudIcon');
+      const refreshText = document.getElementById('refreshCloudText');
+
+      // 若尚未設定雲端網址，則讀取 localStorage 本機暫存訂單
+      if (!state.gasUrl) {
+        state.isCloudConnected = false;
+        try {
+          const raw = localStorage.getItem(STORAGE_KEYS.LOCAL_ORDERS);
+          state.cloudOrders = raw ? JSON.parse(raw) : [];
+        } catch (err) {
+          state.cloudOrders = [];
+        }
+        state.lastSyncedAt = '本機暫存模式';
+        updateCloudConnectionUI();
+        renderCloudSummarySection();
+        if (showFeedback) {
+          showToast('目前為本機暫存模式，請設定 Google 試算表網址以同步多人訂單', 'warn');
+        }
+        return;
+      }
+
+      if (state.isSyncing) return;
+      state.isSyncing = true;
+      refreshIcon.classList.add('animate-spin');
+      refreshText.textContent = '同步中...';
+
+      try {
+        const separator = state.gasUrl.includes('?') ? '&' : '?';
+        const endpoint = `${state.gasUrl}${separator}action=getOrders&t=${Date.now()}`;
+        const response = await fetch(endpoint, { method: 'GET' });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        if (data && data.status === 'success' && Array.isArray(data.orders)) {
+          state.cloudOrders = data.orders.map((row) => ({
+            id: String(row.id || ''),
+            timestamp: String(row.timestamp || ''),
+            orderer: String(row.orderer || '未命名點餐人'),
+            category: String(row.category || ''),
+            name: String(row.name || ''),
+            unitPrice: Number(row.unitPrice) || 0,
+            qty: Number(row.qty) || 1,
+            subtotal: Number(row.subtotal) || (Number(row.unitPrice) || 0) * (Number(row.qty) || 1),
+            note: String(row.note || '')
+          }));
+          state.isCloudConnected = true;
+          const now = new Date();
+          state.lastSyncedAt = `上次雲端同步：${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+          if (showFeedback) {
+            showToast(`雲端同步成功，目前共 ${state.cloudOrders.length} 筆點餐明細`);
+          }
+        } else {
+          throw new Error(data?.message || '回傳資料格式異常');
+        }
+      } catch (err) {
+        state.isCloudConnected = false;
+        state.lastSyncedAt = '雲端連線失敗';
+        if (showFeedback) {
+          showToast('連線 Google 試算表失敗，請確認網址與「所有人」存取權限', 'error');
+        }
+      } finally {
+        state.isSyncing = false;
+        refreshIcon.classList.remove('animate-spin');
+        refreshText.textContent = '重新整理雲端紀錄';
+        updateCloudConnectionUI();
+        renderCloudSummarySection();
+      }
+    }
+
+    // ==================== 菜單篩選與蘋果精緻徽章渲染 ====================
+    function matchesSearch(item, extraKeywords = '') {
+      const q = state.searchQuery.trim().toLowerCase();
+      if (!q) return true;
+      const haystack = `${item.name} ${item.remark || ''} ${item.priceText || ''} ${item.category || ''} ${extraKeywords}`.toLowerCase();
+      return haystack.includes(q);
+    }
+
+    function renderRemarkBadges(remark) {
+      if (!remark || remark === '—') {
+        return `<span class="text-[12px] text-[#86868B]">經典標準供應</span>`;
+      }
+
+      const parts = remark.split('；').map((s) => s.trim()).filter(Boolean);
+      return `<div class="flex flex-wrap gap-1.5">${parts
+        .map((part) => {
+          if (part.includes('限定品項')) {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FBF8F1] text-[#9A6F18] border border-[#D4AF37]/40">${escapeHtml(part)}</span>`;
+          }
+          if (part.includes('熟食') || part.includes('嚴禁生食')) {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FDF2F2] text-[#B81D24] border border-[#B81D24]/20">${escapeHtml(part)}</span>`;
+          }
+          if (part.includes('奶蛋素')) {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F1F8F3] text-[#1E6B38] border border-[#1E6B38]/20">${escapeHtml(part)}</span>`;
+          }
+          if (part.includes('辣度')) {
+            const levelMatch = part.match(/(\d+)/);
+            const level = levelMatch ? Number(levelMatch[1]) : 1;
+            const chilies = '🌶️'.repeat(level);
+            return `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#FDF2F2] text-[#B81D24]">${chilies} ${escapeHtml(part)}</span>`;
+          }
+          return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#F5F5F7] text-[#515154] border border-[#E5E5EA]">${escapeHtml(part)}</span>`;
+        })
+        .join('')}</div>`;
+    }
+
+    /**
+     * 渲染二、湯品（湯底加價，17款）
+     */
+    function renderSoups() {
+      const grid = document.getElementById('soupGrid');
+      const filtered = MENU_DATA.soups.filter((soup) => {
+        if (!matchesSearch(soup, '湯品 湯底')) return false;
+        if (state.soupFilter === 'non-spicy' && soup.spiceLevel > 0) return false;
+        if (state.soupFilter === 'spicy' && soup.spiceLevel === 0) return false;
+        if (state.soupFilter === 'meat' && !soup.hasMeat) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-[#F5F5F7] rounded-[22px] p-10 text-center text-[#6E6E73]">
+            找不到符合條件的湯底品項，請調整篩選或搜尋關鍵字。
+          </div>
+        `;
+        return 0;
+      }
+
+      grid.innerHTML = filtered
+        .map((soup) => {
+          const orderTitle = `${soup.name}${soup.remark !== '—' ? '（' + soup.remark + '）' : ''}`;
+          return `
+            <article class="apple-card p-5 sm:p-6 flex flex-col justify-between gap-4">
+              <div>
+                <div class="flex items-start justify-between gap-3">
+                  <h3 class="text-[17px] font-bold text-[#1D1D1F] leading-snug">${escapeHtml(soup.name)}</h3>
+                  <span class="text-[18px] font-bold text-[#1D1D1F] tabular-price shrink-0">${escapeHtml(soup.priceText)}</span>
+                </div>
+                <div class="mt-2.5 min-h-[24px] flex items-center">
+                  ${renderRemarkBadges(soup.remark)}
+                </div>
+              </div>
+
+              <div class="pt-3.5 border-t border-[#E5E5EA] flex items-center justify-between">
+                <span class="text-[12px] text-[#86868B]">湯底加價</span>
+                <button
+                  type="button"
+                  data-add-key="${soup.id}"
+                  data-add-name="${escapeHtml(orderTitle)}"
+                  data-add-cat="湯品（湯底加價）"
+                  data-add-price="${soup.price}"
+                  class="add-draft-btn inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#1D1D1F] hover:text-white active:scale-[0.97] transition-all"
+                >
+                  <span>+ 加入</span>
+                </button>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+
+      return filtered.length;
+    }
+
+    /**
+     * 渲染三、鍋物套餐（28款）
+     */
+    function renderSets() {
+      const container = document.getElementById('setsContainer');
+      const categories = ['海鮮火鍋套餐', '牛肉火鍋套餐', '豬肉火鍋套餐', '雞・鴨・羊・素食火鍋套餐'];
+      let totalMatches = 0;
+
+      const sectionsHtml = categories
+        .filter((cat) => state.setFilter === 'all' || state.setFilter === cat)
+        .map((cat) => {
+          const items = MENU_DATA.sets.filter((item) => item.category === cat && matchesSearch(item, '鍋物套餐'));
+          totalMatches += items.length;
+          if (items.length === 0) return '';
+
+          const cardsHtml = items
+            .map((item) => {
+              const actionHtml =
+                item.prices.length === 1
+                  ? `<button
+                      type="button"
+                      data-add-key="${item.id}"
+                      data-add-name="${escapeHtml(item.name)}"
+                      data-add-cat="${escapeHtml(item.category)}"
+                      data-add-price="${item.prices[0].value}"
+                      class="add-draft-btn inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#1D1D1F] hover:text-white active:scale-[0.97] transition-all"
+                    >
+                      <span>+ 加入</span>
+                    </button>`
+                  : `<div class="flex items-center gap-1.5">
+                      ${item.prices
+                        .map(
+                          (p) => `
+                        <button
+                          type="button"
+                          data-add-key="${item.id}-${p.label}"
+                          data-add-name="${escapeHtml(item.name + ' (' + p.label + ')')}"
+                          data-add-cat="${escapeHtml(item.category)}"
+                          data-add-price="${p.value}"
+                          class="add-draft-btn inline-flex items-center px-3 py-1.5 rounded-full text-[12px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#1D1D1F] hover:text-white active:scale-[0.97] transition-all tabular-price"
+                        >
+                          + ${p.label}份 $${p.value}
+                        </button>
+                      `
+                        )
+                        .join('')}
+                    </div>`;
+
+              return `
+                <article class="apple-card p-5 sm:p-6 flex flex-col justify-between gap-4">
+                  <div>
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-[17px] font-bold text-[#1D1D1F] leading-snug">${escapeHtml(item.name)}</h3>
+                      <span class="text-[17px] font-bold text-[#1D1D1F] tabular-price shrink-0 text-right">${escapeHtml(item.priceText)}</span>
+                    </div>
+                    <div class="mt-2.5 min-h-[24px] flex items-center">
+                      ${renderRemarkBadges(item.remark)}
+                    </div>
+                  </div>
+
+                  <div class="pt-3.5 border-t border-[#E5E5EA] flex items-center justify-between gap-2">
+                    <span class="text-[12px] text-[#86868B] truncate">${escapeHtml(item.category)}</span>
+                    ${actionHtml}
+                  </div>
+                </article>
+              `;
+            })
+            .join('');
+
+          return `
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-[20px] font-bold text-[#1D1D1F] tracking-tight">${escapeHtml(cat)}</h3>
+                <span class="text-[12px] font-medium text-[#6E6E73] tabular-price">${items.length} 款套餐</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                ${cardsHtml}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      if (totalMatches === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-[22px] p-10 text-center text-[#6E6E73] border border-[#E5E5EA]">
+            找不到符合條件的鍋物套餐，請調整分類或搜尋關鍵字。
+          </div>
+        `;
+      } else {
+        container.innerHTML = sectionsHtml;
+      }
+
+      return totalMatches;
+    }
+
+    /**
+     * 渲染四、單品加點（26款）
+     */
+    function renderAlacarte() {
+      const container = document.getElementById('alacarteContainer');
+      const categories = ['牛肉', '豬肉', '羊／雞／鴨', '海鮮'];
+      let totalMatches = 0;
+
+      const sectionsHtml = categories
+        .filter((cat) => state.alacarteFilter === 'all' || state.alacarteFilter === cat)
+        .map((cat) => {
+          const items = MENU_DATA.alacarte.filter((item) => item.category === cat && matchesSearch(item, '單品加點'));
+          totalMatches += items.length;
+          if (items.length === 0) return '';
+
+          const cardsHtml = items
+            .map((item) => {
+              const actionAreaHtml = Array.isArray(item.options)
+                ? `<div class="pt-3.5 border-t border-[#E5E5EA] space-y-2">
+                    <div class="text-[12px] text-[#86868B]">單品加點・點選品項加入：</div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                      ${item.options
+                        .map(
+                          (opt) => `
+                        <button
+                          type="button"
+                          data-add-key="${item.id}-${opt}"
+                          data-add-name="${escapeHtml(opt + '（單點）')}"
+                          data-add-cat="${escapeHtml('單品加點・' + item.category)}"
+                          data-add-price="${item.price}"
+                          class="add-draft-btn inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-[12px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#1D1D1F] hover:text-white active:scale-[0.97] transition-all tabular-price"
+                        >
+                          + ${escapeHtml(opt)}
+                        </button>
+                      `
+                        )
+                        .join('')}
+                    </div>
+                  </div>`
+                : `<div class="pt-3.5 border-t border-[#E5E5EA] flex items-center justify-between gap-2">
+                    <span class="text-[12px] text-[#86868B]">單品加點・${escapeHtml(item.category)}</span>
+                    <button
+                      type="button"
+                      data-add-key="${item.id}"
+                      data-add-name="${escapeHtml(item.name + '（單點）')}"
+                      data-add-cat="${escapeHtml('單品加點・' + item.category)}"
+                      data-add-price="${item.price}"
+                      class="add-draft-btn inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold bg-[#F5F5F7] text-[#1D1D1F] hover:bg-[#1D1D1F] hover:text-white active:scale-[0.97] transition-all"
+                    >
+                      <span>+ 加入</span>
+                    </button>
+                  </div>`;
+
+              return `
+                <article class="apple-card p-5 sm:p-6 flex flex-col justify-between gap-4">
+                  <div>
+                    <div class="flex items-start justify-between gap-3">
+                      <h3 class="text-[17px] font-bold text-[#1D1D1F] leading-snug">${escapeHtml(item.name)}</h3>
+                      <span class="text-[18px] font-bold text-[#1D1D1F] tabular-price shrink-0">${escapeHtml(item.priceText)}</span>
+                    </div>
+                    <div class="mt-2.5 min-h-[24px] flex items-center">
+                      ${renderRemarkBadges(item.remark)}
+                    </div>
+                  </div>
+                  ${actionAreaHtml}
+                </article>
+              `;
+            })
+            .join('');
+
+          return `
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-[20px] font-bold text-[#1D1D1F] tracking-tight">單品加點・${escapeHtml(cat)}</h3>
+                <span class="text-[12px] font-medium text-[#6E6E73] tabular-price">${items.length} 款單品</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                ${cardsHtml}
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      if (totalMatches === 0) {
+        container.innerHTML = `
+          <div class="bg-[#F5F5F7] rounded-[22px] p-10 text-center text-[#6E6E73]">
+            找不到符合條件的單品加點，請調整分類或搜尋關鍵字。
+          </div>
+        `;
+      } else {
+        container.innerHTML = sectionsHtml;
+      }
+
+      return totalMatches;
+    }
+
+    /**
+     * 統一渲染全站菜單區塊並更新搜尋筆數
+     */
+    function renderAllMenus() {
+      const c1 = renderSoups();
+      const c2 = renderSets();
+      const c3 = renderAlacarte();
+      const total = c1 + c2 + c3;
+
+      const hasQuery = state.searchQuery.trim().length > 0;
+      const statusBar = document.getElementById('searchStatusBar');
+      const countEl = document.getElementById('searchMatchCount');
+      const clearBtn = document.getElementById('clearSearchBtn');
+
+      if (hasQuery) {
+        statusBar.classList.remove('hidden');
+        clearBtn.classList.remove('hidden');
+        countEl.textContent = total;
+      } else {
+        statusBar.classList.add('hidden');
+        clearBtn.classList.add('hidden');
+      }
+    }
+
+    // ==================== 步驟 A：我的待送出清單（Draft Cart）管理 ====================
+
+    function saveDraftToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.DRAFT_CART, JSON.stringify(state.draftCart));
+        localStorage.setItem(STORAGE_KEYS.ORDERER_NAME, state.ordererName);
+      } catch (err) {
+        // 忽略 localStorage 寫入例外
+      }
+    }
+
+    function addItemToDraftCart(itemKey, name, categoryLabel, unitPrice) {
+      const existing = state.draftCart.find((item) => item.itemKey === itemKey);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        state.draftCart.push({
+          itemKey,
+          name,
+          categoryLabel,
+          unitPrice,
+          qty: 1
+        });
+      }
+      saveDraftToStorage();
+      renderDraftCartSection();
+      showToast(`已加入待送出清單：「${name}」`);
+    }
+
+    function changeDraftQty(itemKey, delta) {
+      const idx = state.draftCart.findIndex((item) => item.itemKey === itemKey);
+      if (idx === -1) return;
+      state.draftCart[idx].qty += delta;
+      if (state.draftCart[idx].qty <= 0) {
+        state.draftCart.splice(idx, 1);
+      }
+      saveDraftToStorage();
+      renderDraftCartSection();
+    }
+
+    function renderDraftCartSection() {
+      const container = document.getElementById('draftItemsContainer');
+      const totalQty = state.draftCart.reduce((sum, i) => sum + i.qty, 0);
+      const subtotal = state.draftCart.reduce((sum, i) => sum + i.unitPrice * i.qty, 0);
+
+      document.getElementById('topDraftBadge').textContent = `${totalQty}份 $${subtotal.toLocaleString()}`;
+      document.getElementById('mobileFloatDraft').textContent = `${totalQty}份 $${subtotal.toLocaleString()}`;
+      document.getElementById('draftTotalQty').textContent = totalQty;
+      document.getElementById('draftSubtotal').textContent = `NT$${subtotal.toLocaleString()}`;
+
+      // 智慧提醒：經典老饕石頭爆量鍋僅限搭配招牌石頭湯底
+      const hasStoneExclusive = state.draftCart.some(
+        (i) => i.name.includes('經典老饕石頭爆量牛肉鍋') || i.name.includes('經典老饕石頭爆量豬肉鍋')
+      );
+      document.getElementById('draftStoneTip').classList.toggle('hidden', !hasStoneExclusive);
+
+      if (state.draftCart.length === 0) {
+        container.innerHTML = `
+          <div class="rounded-2xl bg-[#F5F5F7] p-8 text-center text-[#6E6E73]">
+            <p class="text-[15px] font-medium text-[#1D1D1F]">目前待送出清單是空的</p>
+            <p class="text-[13px] mt-1">請在上方菜單點擊「+ 加入」、「+ 大份」或「+ 小份」選取您要點的湯底、套餐或單品。</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="divide-y divide-[#E5E5EA] border border-[#E5E5EA] rounded-2xl overflow-hidden">
+          ${state.draftCart
+            .map(
+              (item) => `
+              <div class="p-4 sm:px-5 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#F5F5F7] text-[#6E6E73] mb-1">
+                    ${escapeHtml(item.categoryLabel)}
+                  </span>
+                  <div class="text-[16px] font-bold text-[#1D1D1F] truncate">${escapeHtml(item.name)}</div>
+                  <div class="text-[13px] text-[#6E6E73] tabular-price">單價 NT$${item.unitPrice.toLocaleString()}</div>
+                </div>
+
+                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      data-draft-key="${escapeHtml(item.itemKey)}"
+                      data-draft-delta="-1"
+                      class="draft-qty-btn w-8 h-8 rounded-full bg-[#F5F5F7] border border-[#E5E5EA] text-[#1D1D1F] font-bold flex items-center justify-center hover:bg-[#E5E5EA] transition-colors"
+                      aria-label="減少數量"
+                    >−</button>
+                    <span class="w-6 text-center text-[15px] font-bold tabular-price">${item.qty}</span>
+                    <button
+                      type="button"
+                      data-draft-key="${escapeHtml(item.itemKey)}"
+                      data-draft-delta="1"
+                      class="draft-qty-btn w-8 h-8 rounded-full bg-[#F5F5F7] border border-[#E5E5EA] text-[#1D1D1F] font-bold flex items-center justify-center hover:bg-[#E5E5EA] transition-colors"
+                      aria-label="增加數量"
+                    >+</button>
+                  </div>
+
+                  <div class="w-24 text-right text-[16px] font-bold text-[#1D1D1F] tabular-price">
+                    NT$${(item.unitPrice * item.qty).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            `
+            )
+            .join('')}
+        </div>
+      `;
+    }
+
+    /**
+     * 送出訂單至 Google 試算表（若未設定 GAS_URL 則儲存至本機暫存）
+     */
+    async function submitDraftOrder() {
+      const orderer = state.ordererName.trim();
+      const note = state.orderNote.trim();
+
+      if (!orderer) {
+        showToast('請先填寫「點餐人姓名」再送出訂單！', 'error');
+        const inputEl = document.getElementById('draftOrdererInput');
+        inputEl.focus();
+        inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      if (state.draftCart.length === 0) {
+        showToast('請先加入至少一項餐點再送出！', 'warn');
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitOrderBtn');
+      const submitBtnText = document.getElementById('submitOrderBtnText');
+      submitBtn.disabled = true;
+
+      // 若尚未設定 GAS_URL，儲存至 localStorage 本機暫存模式
+      if (!state.gasUrl) {
+        const now = new Date();
+        const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        state.draftCart.forEach((item) => {
+          state.cloudOrders.push({
+            id: `LOCAL-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            timestamp: ts,
+            orderer,
+            category: item.categoryLabel,
+            name: item.name,
+            unitPrice: item.unitPrice,
+            qty: item.qty,
+            subtotal: item.unitPrice * item.qty,
+            note
+          });
+        });
+        try {
+          localStorage.setItem(STORAGE_KEYS.LOCAL_ORDERS, JSON.stringify(state.cloudOrders));
+        } catch (err) {
+          // 忽略儲存例外
+        }
+
+        state.draftCart = [];
+        state.orderNote = '';
+        document.getElementById('topNoteInput').value = '';
+        document.getElementById('draftNoteInput').value = '';
+        saveDraftToStorage();
+        renderDraftCartSection();
+        renderCloudSummarySection();
+        submitBtn.disabled = false;
+        showToast(`已將【${orderer}】的餐點加入本機統計（設定雲端網址後可多人同步）`, 'warn');
+        document.getElementById('cloud-summary').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
+      // 傳送 POST 請求至 Google Apps Script（使用 text/plain 避免 CORS preflight 問題）
+      submitBtnText.textContent = '傳送至雲端試算表中...';
+      try {
+        const payload = {
+          action: 'submitOrder',
+          orderer,
+          diningMode: state.isDineIn ? '內用' : '外帶',
+          note,
+          items: state.draftCart.map((i) => ({
+            itemKey: i.itemKey,
+            name: i.name,
+            categoryLabel: i.categoryLabel,
+            unitPrice: i.unitPrice,
+            qty: i.qty
+          }))
+        };
+
+        const response = await fetch(state.gasUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result && result.status === 'success') {
+          state.draftCart = [];
+          state.orderNote = '';
+          document.getElementById('topNoteInput').value = '';
+          document.getElementById('draftNoteInput').value = '';
+          saveDraftToStorage();
+          renderDraftCartSection();
+          showToast(`已成功送出【${orderer}】的訂單至 Google 試算表！`);
+          await fetchCloudOrders(false);
+          document.getElementById('cloud-summary').scrollIntoView({ behavior: 'smooth' });
+        } else {
+          throw new Error(result?.message || '寫入雲端試算表失敗');
+        }
+      } catch (err) {
+        showToast(`送出失敗：${err.message || '請檢查網路與試算表網址'}`, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        updateCloudConnectionUI();
+      }
+    }
+
+    // ==================== 步驟 B：全體雲端點餐統計（分帳總表 / 個人卡片 / 品項彙整） ====================
+
+    /**
+     * 刪除雲端試算表中的單筆紀錄或整位點餐人紀錄
+     */
+    async function deleteCloudRecord(action, targetValue) {
+      // 本機暫存模式
+      if (!state.gasUrl) {
+        if (action === 'deleteItem') {
+          state.cloudOrders = state.cloudOrders.filter((o) => o.id !== targetValue);
+        } else if (action === 'deleteOrderer') {
+          state.cloudOrders = state.cloudOrders.filter((o) => o.orderer !== targetValue);
+        }
+        try {
+          localStorage.setItem(STORAGE_KEYS.LOCAL_ORDERS, JSON.stringify(state.cloudOrders));
+        } catch (err) {
+          // 忽略例外
+        }
+        state.confirmDeleteTarget = null;
+        renderCloudSummarySection();
+        showToast('已刪除該筆點餐紀錄');
+        return;
+      }
+
+      // 雲端模式
+      showToast('正在從 Google 試算表刪除紀錄...', 'warn');
+      try {
+        const bodyPayload =
+          action === 'deleteItem'
+            ? { action: 'deleteItem', id: targetValue }
+            : { action: 'deleteOrderer', orderer: targetValue };
+
+        const response = await fetch(state.gasUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(bodyPayload)
+        });
+        const result = await response.json();
+        if (result && result.status === 'success') {
+          state.confirmDeleteTarget = null;
+          showToast('已從 Google 試算表刪除紀錄');
+          await fetchCloudOrders(false);
+        } else {
+          throw new Error(result?.message || '刪除失敗');
+        }
+      } catch (err) {
+        showToast(`刪除失敗：${err.message}`, 'error');
+      }
+    }
+
+    /**
+     * 計算雲端全體統計數據
+     */
+    function computeCloudStatistics() {
+      const personMap = new Map();
+
+      state.cloudOrders.forEach((row) => {
+        const personName = row.orderer || '未命名點餐人';
+        if (!personMap.has(personName)) {
+          personMap.set(personName, {
+            orderer: personName,
+            records: [],
+            totalQty: 0,
+            subtotal: 0,
+            serviceFee: 0,
+            payableTotal: 0
+          });
+        }
+        const entry = personMap.get(personName);
+        const qty = Number(row.qty) || 1;
+        const unitPrice = Number(row.unitPrice) || 0;
+        const rowSub = Number(row.subtotal) || unitPrice * qty;
+
+        entry.records.push({
+          ...row,
+          qty,
+          unitPrice,
+          subtotal: rowSub
+        });
+        entry.totalQty += qty;
+        entry.subtotal += rowSub;
+      });
+
+      const personList = Array.from(personMap.values()).map((p) => {
+        const serviceFee = state.isDineIn ? Math.round(p.subtotal * 0.1) : 0;
+        return {
+          ...p,
+          serviceFee,
+          payableTotal: p.subtotal + serviceFee
+        };
+      });
+
+      // 依品項彙整（向店家點餐用）
+      const itemMap = new Map();
+      state.cloudOrders.forEach((row) => {
+        const key = `${row.category}__${row.name}__${row.unitPrice}`;
+        if (!itemMap.has(key)) {
+          itemMap.set(key, {
+            category: row.category || '餐點',
+            name: row.name,
+            unitPrice: Number(row.unitPrice) || 0,
+            totalQty: 0,
+            totalAmount: 0,
+            breakdown: []
+          });
+        }
+        const itemEntry = itemMap.get(key);
+        const qty = Number(row.qty) || 1;
+        const rowSub = Number(row.subtotal) || itemEntry.unitPrice * qty;
+        itemEntry.totalQty += qty;
+        itemEntry.totalAmount += rowSub;
+        const noteTag = row.note ? `(${row.note})` : '';
+        itemEntry.breakdown.push(`${row.orderer}×${qty}${noteTag}`);
+      });
+
+      const grandQty = personList.reduce((sum, p) => sum + p.totalQty, 0);
+      const grandSubtotal = personList.reduce((sum, p) => sum + p.subtotal, 0);
+      const grandServiceFee = personList.reduce((sum, p) => sum + p.serviceFee, 0);
+      const grandPayable = personList.reduce((sum, p) => sum + p.payableTotal, 0);
+
+      return {
+        personList,
+        aggregatedItems: Array.from(itemMap.values()),
+        grandQty,
+        grandSubtotal,
+        grandServiceFee,
+        grandPayable
+      };
+    }
+
+    /**
+     * 渲染步驟 B：全體雲端點餐統計區
+     */
+    function renderCloudSummarySection() {
+      const stats = computeCloudStatistics();
+
+      // 同步更新頂部徽章、手機浮動列與同步時間標籤
+      document.getElementById('headerCloudBadge').textContent = `${stats.grandQty}份 $${stats.grandPayable.toLocaleString()}`;
+      document.getElementById('mobileFloatCloudTotal').textContent = `NT$${stats.grandPayable.toLocaleString()}`;
+      document.getElementById('mobileFloatCloudMode').textContent = state.isDineIn ? '全體統計・內用10%' : '全體統計・外帶免收';
+      document.getElementById('lastSyncedLabel').textContent = state.lastSyncedAt ? `（${state.lastSyncedAt}）` : '';
+
+      // 同步內用/外帶按鈕外觀
+      document.querySelectorAll('.dining-mode-btn').forEach((btn) => {
+        const isDineBtn = btn.dataset.diningMode === 'dine-in';
+        if (isDineBtn === state.isDineIn) {
+          btn.classList.add('active');
+          btn.classList.remove('text-[#6E6E73]');
+        } else {
+          btn.classList.remove('active');
+          btn.classList.add('text-[#6E6E73]');
+        }
+      });
+
+      const container = document.getElementById('cloudStatsContainer');
+
+      if (stats.grandQty === 0) {
+        container.innerHTML = `
+          <div class="bg-[#F5F5F7] rounded-[24px] p-10 sm:p-14 border border-[#E5E5EA] text-center">
+            <div class="w-14 h-14 rounded-2xl bg-white text-[#86868B] flex items-center justify-center mx-auto mb-4 border border-[#E5E5EA]">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 class="text-[19px] font-bold text-[#1D1D1F]">目前尚無已送出的點餐紀錄</h3>
+            <p class="mt-2 text-[15px] text-[#6E6E73] max-w-md mx-auto">
+              請先在上方菜單加入餐點並填寫點餐人姓名，點擊「送出訂單至 Google 試算表」後，這裡就會自動顯示每個人的分帳明細。
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      // 視圖二：依品項彙整（向店家點餐用）
+      if (state.statsView === 'by-item') {
+        const rowsHtml = stats.aggregatedItems
+          .map(
+            (item) => `
+            <div class="p-5 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#F5F5F7] text-[#6E6E73] border border-[#E5E5EA]">
+                    ${escapeHtml(item.category)}
+                  </span>
+                  <h4 class="text-[16px] font-bold text-[#1D1D1F]">${escapeHtml(item.name)}</h4>
+                  <span class="text-[14px] text-[#6E6E73] tabular-price">
+                    $${item.unitPrice.toLocaleString()} × <strong class="text-[#1D1D1F]">${item.totalQty} 份</strong>
+                  </span>
+                </div>
+                <p class="text-[13px] font-medium text-[#B81D24]">
+                  點餐人分配：${escapeHtml(item.breakdown.join('、'))}
+                </p>
+              </div>
+              <div class="text-left sm:text-right shrink-0">
+                <span class="text-[12px] text-[#86868B] mr-1.5">小計</span>
+                <span class="text-[18px] font-bold text-[#1D1D1F] tabular-price">NT$${item.totalAmount.toLocaleString()}</span>
+              </div>
+            </div>
+          `
+          )
+          .join('');
+
+        container.innerHTML = `
+          <div class="bg-white rounded-[24px] border border-[#E5E5EA] overflow-hidden shadow-2xs">
+            <div class="px-6 py-4 bg-[#FBF8F1] border-b border-[#E5E5EA] flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-[16px] font-bold text-[#1D1D1F]">向店家點餐品項彙整表</h3>
+              <span class="text-[13px] font-semibold text-[#9A6F18] tabular-price">
+                共 ${stats.aggregatedItems.length} 種品項 / 合計 ${stats.grandQty} 份
+              </span>
+            </div>
+            <div class="divide-y divide-[#E5E5EA]">
+              ${rowsHtml}
+            </div>
+            <div class="px-6 py-4 bg-[#F5F5F7] border-t border-[#E5E5EA] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="text-[14px] text-[#6E6E73]">
+                餐點小計 <strong class="text-[#1D1D1F] tabular-price">NT$${stats.grandSubtotal.toLocaleString()}</strong>
+                ＋ ${state.isDineIn ? '內用服務費 (10%)' : '外帶服務費 (免收)'}
+                <strong class="text-[#1D1D1F] tabular-price">NT$${stats.grandServiceFee.toLocaleString()}</strong>
+              </div>
+              <div class="text-[20px] font-bold text-[#B81D24] tabular-price">
+                全體應付總額：NT$${stats.grandPayable.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 視圖一：依點餐人統計（分帳總表 ＋ 個人明細卡片）
+      const tableRowsHtml = stats.personList
+        .map((p) => {
+          const summaryStr = p.records.map((r) => `${r.name}×${r.qty}`).join('、');
+          return `
+            <tr class="hover:bg-[#F5F5F7]/65 transition-colors">
+              <td class="px-5 py-4 font-bold text-[#1D1D1F] whitespace-nowrap">${escapeHtml(p.orderer)}</td>
+              <td class="px-5 py-4 text-[13px] text-[#6E6E73] min-w-[220px]">${escapeHtml(summaryStr)}</td>
+              <td class="px-5 py-4 text-center font-medium tabular-price whitespace-nowrap">${p.totalQty} 份</td>
+              <td class="px-5 py-4 text-right font-medium tabular-price whitespace-nowrap">NT$${p.subtotal.toLocaleString()}</td>
+              <td class="px-5 py-4 text-right text-[#6E6E73] tabular-price whitespace-nowrap">NT$${p.serviceFee.toLocaleString()}</td>
+              <td class="px-5 py-4 text-right font-bold text-[#B81D24] tabular-price whitespace-nowrap">NT$${p.payableTotal.toLocaleString()}</td>
+            </tr>
+          `;
+        })
+        .join('');
+
+      const personCardsHtml = stats.personList
+        .map((p) => {
+          const confirmOrdererKey = `orderer:${p.orderer}`;
+          const isConfirmOrderer = state.confirmDeleteTarget === confirmOrdererKey;
+
+          const itemsHtml = p.records
+            .map((rec) => {
+              const confirmItemKey = `item:${rec.id}`;
+              const isConfirmItem = state.confirmDeleteTarget === confirmItemKey;
+              return `
+                <div class="py-3.5 flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                      <span class="text-[11px] font-medium text-[#86868B]">${escapeHtml(rec.category)}</span>
+                      ${
+                        rec.note
+                          ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#FBF8F1] text-[#9A6F18] border border-[#D4AF37]/30">備註：${escapeHtml(rec.note)}</span>`
+                          : ''
+                      }
+                    </div>
+                    <div class="text-[15px] font-semibold text-[#1D1D1F] mt-0.5">
+                      ${escapeHtml(rec.name)} <span class="text-[#6E6E73] font-medium tabular-price">× ${rec.qty}</span>
+                    </div>
+                    <div class="text-[12px] text-[#86868B] tabular-price">
+                      單價 NT$${rec.unitPrice.toLocaleString()}${rec.timestamp ? ' ・ ' + escapeHtml(rec.timestamp) : ''}
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-[15px] font-bold text-[#1D1D1F] tabular-price">
+                      NT$${rec.subtotal.toLocaleString()}
+                    </span>
+                    <button
+                      type="button"
+                      data-del-action="deleteItem"
+                      data-del-value="${escapeHtml(rec.id)}"
+                      class="cloud-del-btn px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                        isConfirmItem
+                          ? 'bg-[#B81D24] text-white'
+                          : 'bg-[#F5F5F7] text-[#6E6E73] hover:bg-[#FDF2F2] hover:text-[#B81D24]'
+                      } transition-colors"
+                    >
+                      ${isConfirmItem ? '確認刪除？' : '刪除'}
+                    </button>
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+
+          return `
+            <article class="bg-white rounded-[24px] p-5 sm:p-6 border border-[#E5E5EA] shadow-2xs flex flex-col justify-between">
+              <div>
+                <div class="pb-4 border-b border-[#E5E5EA] flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="w-8 h-8 rounded-full bg-[#1D1D1F] text-white text-[13px] font-bold flex items-center justify-center shrink-0">
+                      ${escapeHtml(p.orderer.slice(0, 1))}
+                    </span>
+                    <h4 class="text-[18px] font-bold text-[#1D1D1F] truncate">${escapeHtml(p.orderer)}</h4>
+                  </div>
+
+                  <button
+                    type="button"
+                    data-del-action="deleteOrderer"
+                    data-del-value="${escapeHtml(p.orderer)}"
+                    class="cloud-del-btn px-3 py-1 rounded-full text-[12px] font-semibold shrink-0 ${
+                      isConfirmOrderer
+                        ? 'bg-[#B81D24] text-white'
+                        : 'bg-[#FDF2F2] text-[#B81D24] hover:bg-[#B81D24] hover:text-white'
+                    } transition-colors"
+                  >
+                    ${isConfirmOrderer ? '再次點擊確認刪除整筆？' : '刪除整位紀錄'}
+                  </button>
+                </div>
+
+                <div class="divide-y divide-[#E5E5EA]">
+                  ${itemsHtml}
+                </div>
+              </div>
+
+              <div class="mt-4 pt-4 border-t border-[#E5E5EA] bg-[#F5F5F7]/75 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 px-5 py-4 sm:px-6 rounded-b-[24px] space-y-1.5">
+                <div class="flex items-center justify-between text-[13px] text-[#6E6E73]">
+                  <span>個人餐點小計（共 ${p.totalQty} 份）</span>
+                  <span class="font-semibold text-[#1D1D1F] tabular-price">NT$${p.subtotal.toLocaleString()}</span>
+                </div>
+                <div class="flex items-center justify-between text-[13px] text-[#6E6E73]">
+                  <span>${state.isDineIn ? '內用服務費 (10%)' : '外帶服務費 (免收)'}</span>
+                  <span class="font-semibold text-[#1D1D1F] tabular-price">NT$${p.serviceFee.toLocaleString()}</span>
+                </div>
+                <div class="pt-2 border-t border-[#E5E5EA] flex items-baseline justify-between">
+                  <span class="text-[15px] font-bold text-[#1D1D1F]">個人應付總額</span>
+                  <span class="text-[20px] font-bold text-[#B81D24] tabular-price">NT$${p.payableTotal.toLocaleString()}</span>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+
+      container.innerHTML = `
+        <!-- 分帳統計總表 -->
+        <div class="bg-white rounded-[24px] border border-[#E5E5EA] overflow-hidden shadow-2xs mb-8">
+          <div class="px-6 py-4 bg-[#F5F5F7]/65 border-b border-[#E5E5EA] flex items-center justify-between">
+            <h3 class="text-[17px] font-bold text-[#1D1D1F]">分帳統計總表</h3>
+            <span class="text-[13px] font-medium text-[#6E6E73] tabular-price">共 ${stats.personList.length} 位點餐人</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-[#F5F5F7] text-[12px] font-semibold text-[#6E6E73] border-b border-[#E5E5EA]">
+                  <th class="px-5 py-3.5 whitespace-nowrap">點餐人</th>
+                  <th class="px-5 py-3.5">所點品項明細</th>
+                  <th class="px-5 py-3.5 text-center whitespace-nowrap">總份數</th>
+                  <th class="px-5 py-3.5 text-right whitespace-nowrap">餐點小計</th>
+                  <th class="px-5 py-3.5 text-right whitespace-nowrap">${state.isDineIn ? '10% 服務費' : '服務費'}</th>
+                  <th class="px-5 py-3.5 text-right whitespace-nowrap">應付總額</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#E5E5EA] text-[14px]">
+                ${tableRowsHtml}
+              </tbody>
+              <tfoot>
+                <tr class="bg-[#F5F5F7] font-bold text-[#1D1D1F] border-t-2 border-[#D1D1D6] text-[15px]">
+                  <td class="px-5 py-4 whitespace-nowrap">全體合計</td>
+                  <td class="px-5 py-4 text-[12px] font-normal text-[#6E6E73]">
+                    ${state.isDineIn ? '內用已加計 10% 服務費' : '外帶免收服務費'}
+                  </td>
+                  <td class="px-5 py-4 text-center tabular-price whitespace-nowrap">${stats.grandQty} 份</td>
+                  <td class="px-5 py-4 text-right tabular-price whitespace-nowrap">NT$${stats.grandSubtotal.toLocaleString()}</td>
+                  <td class="px-5 py-4 text-right tabular-price whitespace-nowrap">NT$${stats.grandServiceFee.toLocaleString()}</td>
+                  <td class="px-5 py-4 text-right text-[17px] text-[#B81D24] tabular-price whitespace-nowrap">NT$${stats.grandPayable.toLocaleString()}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- 個人明細卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          ${personCardsHtml}
+        </div>
+      `;
+    }
+
+    /**
+     * 一鍵複製適合貼入 LINE 群組的分帳統計純文字明細
+     */
+    function copyLineSummary() {
+      const stats = computeCloudStatistics();
+      if (stats.grandQty === 0) {
+        showToast('目前尚無點餐紀錄可複製', 'warn');
+        return;
+      }
+
+      const modeText = state.isDineIn ? '內用（加收 10% 服務費）' : '外帶（免收服務費）';
+      const lines = [
+        '【築間幸福鍋物｜一般門市適用 點餐分帳明細】',
+        `用餐方式：${modeText}`,
+        '=============================='
+      ];
+
+      stats.personList.forEach((p) => {
+        lines.push(`👤 ${p.orderer}（共 ${p.totalQty} 份）`);
+        p.records.forEach((r) => {
+          const noteStr = r.note ? ` [${r.note}]` : '';
+          lines.push(`  ・${r.name} $${r.unitPrice.toLocaleString()} × ${r.qty} = $${r.subtotal.toLocaleString()}${noteStr}`);
+        });
+        if (state.isDineIn) {
+          lines.push(`  小計 $${p.subtotal.toLocaleString()} ＋ 10%服務費 $${p.serviceFee.toLocaleString()} → 應付：NT$${p.payableTotal.toLocaleString()}`);
+        } else {
+          lines.push(`  → 應付：NT$${p.payableTotal.toLocaleString()}`);
+        }
+        lines.push('');
+      });
+
+      lines.push('==============================');
+      lines.push('【向店家點餐品項彙整】');
+      stats.aggregatedItems.forEach((item) => {
+        lines.push(`・${item.name} × ${item.totalQty} 份（${item.breakdown.join('、')}）`);
+      });
+      lines.push('------------------------------');
+      lines.push(`全體總份數：${stats.grandQty} 份`);
+      lines.push(`餐點小計：NT$${stats.grandSubtotal.toLocaleString()}`);
+      if (state.isDineIn) {
+        lines.push(`內用服務費 (10%)：NT$${stats.grandServiceFee.toLocaleString()}`);
+      }
+      lines.push(`全體應付總額：NT$${stats.grandPayable.toLocaleString()}`);
+
+      copyTextSafely(lines.join('\n'), '已複製分帳統計明細，可直接貼到 LINE 群組！');
+    }
+
+    /**
+     * 安全複製文字至剪貼簿（相容 iFrame 與所有行動裝置瀏覽器）
+     */
+    function copyTextSafely(text, successMsg) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (err) {
+        showToast('複製失敗，請手動選取複製', 'error');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // ==================== 頁面初始化與互動事件綁定 ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. 載入初始設定與暫存
+      state.gasUrl = resolveInitialGasUrl();
+      document.getElementById('gasUrlInput').value = state.gasUrl;
+
+      try {
+        const savedOrderer = localStorage.getItem(STORAGE_KEYS.ORDERER_NAME) || '';
+        state.ordererName = savedOrderer;
+        document.getElementById('topOrdererInput').value = savedOrderer;
+        document.getElementById('draftOrdererInput').value = savedOrderer;
+
+        const savedDraft = localStorage.getItem(STORAGE_KEYS.DRAFT_CART);
+        if (savedDraft) state.draftCart = JSON.parse(savedDraft);
+
+        const savedDiningMode = localStorage.getItem(STORAGE_KEYS.DINING_MODE);
+        if (savedDiningMode === 'takeout') state.isDineIn = false;
+      } catch (err) {
+        // 忽略 localStorage 讀取例外
+      }
+
+      // 若未設定雲端網址，自動展開連線設定面板方便首次部署設定
+      const cloudConfigPanel = document.getElementById('cloudConfigPanel');
+      const cloudPanelChevron = document.getElementById('cloudPanelChevron');
+      if (!state.gasUrl) {
+        cloudConfigPanel.classList.remove('hidden');
+        cloudPanelChevron.classList.add('rotate-180');
+      }
+
+      renderAllMenus();
+      renderDraftCartSection();
+      updateCloudConnectionUI();
+      fetchCloudOrders(false);
+
+      // 2. 手機版漢堡選單抽屜控制
+      const mobileDrawer = document.getElementById('mobileMenuDrawer');
+      const mobileBackdrop = document.getElementById('mobileMenuBackdrop');
+      const mobilePanel = document.getElementById('mobileMenuPanel');
+
+      function openMobileMenu() {
+        mobileDrawer.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          mobileBackdrop.classList.remove('opacity-0');
+          mobileBackdrop.classList.add('opacity-100');
+          mobilePanel.classList.remove('translate-x-full');
+          mobilePanel.classList.add('translate-x-0');
+        });
+      }
+
+      function closeMobileMenu() {
+        mobileBackdrop.classList.remove('opacity-100');
+        mobileBackdrop.classList.add('opacity-0');
+        mobilePanel.classList.remove('translate-x-0');
+        mobilePanel.classList.add('translate-x-full');
+        setTimeout(() => {
+          mobileDrawer.classList.add('hidden');
+        }, 320);
+      }
+
+      document.getElementById('openMobileMenuBtn').addEventListener('click', openMobileMenu);
+      document.getElementById('closeMobileMenuBtn').addEventListener('click', closeMobileMenu);
+      mobileBackdrop.addEventListener('click', closeMobileMenu);
+      document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+        link.addEventListener('click', closeMobileMenu);
+      });
+
+      // 3. 雲端連線設定面板展開/收合
+      function toggleCloudPanel(forceOpen = null) {
+        const isHidden = cloudConfigPanel.classList.contains('hidden');
+        const nextOpen = forceOpen !== null ? forceOpen : isHidden;
+        cloudConfigPanel.classList.toggle('hidden', !nextOpen);
+        cloudPanelChevron.classList.toggle('rotate-180', nextOpen);
+      }
+
+      document.getElementById('toggleCloudPanelBtn').addEventListener('click', () => toggleCloudPanel());
+      document.getElementById('headerCloudStatusBtn').addEventListener('click', () => toggleCloudPanel(true));
+
+      // 4. 儲存並測試 Google Apps Script 連線
+      document.getElementById('saveAndTestGasBtn').addEventListener('click', async () => {
+        const rawUrl = document.getElementById('gasUrlInput').value.trim();
+        if (!rawUrl) {
+          showToast('請先輸入 Google Apps Script 網頁應用程式網址', 'warn');
+          return;
+        }
+        if (!rawUrl.startsWith('https://script.google.com/')) {
+          showToast('網址格式應為 https://script.google.com/macros/s/.../exec', 'warn');
+        }
+        state.gasUrl = rawUrl;
+        try {
+          localStorage.setItem(STORAGE_KEYS.GAS_URL, rawUrl);
+        } catch (err) {
+          // 忽略例外
+        }
+        await fetchCloudOrders(true);
+      });
+
+      // 5. 複製群組分享連結（自動帶入 ?api= 參數，朋友點開免設定直接連線）
+      document.getElementById('copyShareLinkBtn').addEventListener('click', () => {
+        const currentUrl = document.getElementById('gasUrlInput').value.trim() || state.gasUrl;
+        if (!currentUrl) {
+          showToast('請先輸入並儲存 Google 試算表網址，再產生分享連結', 'warn');
+          return;
+        }
+        const baseUrl = window.location.href.split('?')[0].split('#')[0];
+        const shareUrl = `${baseUrl}?api=${encodeURIComponent(currentUrl)}`;
+        copyTextSafely(shareUrl, '已複製專屬點餐分享連結！傳給朋友點開即可直接連線點餐');
+      });
+
+      // 6. 重設雲端網址
+      document.getElementById('resetGasUrlBtn').addEventListener('click', () => {
+        state.gasUrl = (DEFAULT_GAS_URL || '').trim();
+        document.getElementById('gasUrlInput').value = state.gasUrl;
+        try {
+          localStorage.removeItem(STORAGE_KEYS.GAS_URL);
+        } catch (err) {
+          // 忽略例外
+        }
+        fetchCloudOrders(false);
+        showToast('已重設雲端網址設定');
+      });
+
+      // 7. 頂部列與步驟 A 表單「點餐人姓名 / 備註」雙向同步
+      const topOrdererInput = document.getElementById('topOrdererInput');
+      const draftOrdererInput = document.getElementById('draftOrdererInput');
+      const topNoteInput = document.getElementById('topNoteInput');
+      const draftNoteInput = document.getElementById('draftNoteInput');
+
+      function syncOrdererName(val) {
+        state.ordererName = val;
+        topOrdererInput.value = val;
+        draftOrdererInput.value = val;
+        saveDraftToStorage();
+      }
+
+      function syncOrderNote(val) {
+        state.orderNote = val;
+        topNoteInput.value = val;
+        draftNoteInput.value = val;
+      }
+
+      topOrdererInput.addEventListener('input', (e) => syncOrdererName(e.target.value));
+      draftOrdererInput.addEventListener('input', (e) => syncOrdererName(e.target.value));
+      topNoteInput.addEventListener('input', (e) => syncOrderNote(e.target.value));
+      draftNoteInput.addEventListener('input', (e) => syncOrderNote(e.target.value));
+
+      // 8. 全站即時搜尋列
+      const searchInput = document.getElementById('globalSearchInput');
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        renderAllMenus();
+      });
+      clearSearchBtn.addEventListener('click', () => {
+        state.searchQuery = '';
+        searchInput.value = '';
+        renderAllMenus();
+        searchInput.focus();
+      });
+
+      // 9. 消費與用餐須知展開/收合
+      const toggleRulesBtn = document.getElementById('toggleRulesBtn');
+      const toggleRulesText = document.getElementById('toggleRulesText');
+      const toggleRulesIcon = document.getElementById('toggleRulesIcon');
+      const rulesGrid = document.getElementById('rulesGridContainer');
+      let rulesExpanded = true;
+
+      toggleRulesBtn.addEventListener('click', () => {
+        rulesExpanded = !rulesExpanded;
+        rulesGrid.classList.toggle('hidden', !rulesExpanded);
+        toggleRulesBtn.setAttribute('aria-expanded', String(rulesExpanded));
+        toggleRulesText.textContent = rulesExpanded ? '收合須知內容' : '展開須知內容';
+        toggleRulesIcon.classList.toggle('rotate-180', !rulesExpanded);
+      });
+
+      // 10. 各區塊 Segmented Control 分類篩選
+      document.querySelectorAll('[data-soup-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-soup-filter]').forEach((b) => {
+            b.classList.remove('active');
+            b.classList.add('text-[#6E6E73]');
+          });
+          btn.classList.add('active');
+          btn.classList.remove('text-[#6E6E73]');
+          state.soupFilter = btn.dataset.soupFilter;
+          renderAllMenus();
+        });
+      });
+
+      document.querySelectorAll('[data-set-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-set-filter]').forEach((b) => {
+            b.classList.remove('active');
+            b.classList.add('text-[#6E6E73]');
+          });
+          btn.classList.add('active');
+          btn.classList.remove('text-[#6E6E73]');
+          state.setFilter = btn.dataset.setFilter;
+          renderAllMenus();
+        });
+      });
+
+      document.querySelectorAll('[data-alacarte-filter]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-alacarte-filter]').forEach((b) => {
+            b.classList.remove('active');
+            b.classList.add('text-[#6E6E73]');
+          });
+          btn.classList.add('active');
+          btn.classList.remove('text-[#6E6E73]');
+          state.alacarteFilter = btn.dataset.alacarteFilter;
+          renderAllMenus();
+        });
+      });
+
+      // 11. 步驟 A 操作：清空待送出清單 & 送出訂單
+      document.getElementById('clearDraftBtn').addEventListener('click', () => {
+        if (state.draftCart.length === 0) return;
+        state.draftCart = [];
+        saveDraftToStorage();
+        renderDraftCartSection();
+        showToast('已清空待送出清單');
+      });
+
+      document.getElementById('submitOrderBtn').addEventListener('click', submitDraftOrder);
+
+      // 12. 步驟 B 操作：重新整理雲端紀錄、複製分帳明細、內用/外帶切換、雙視圖切換
+      document.getElementById('refreshCloudBtn').addEventListener('click', () => fetchCloudOrders(true));
+      document.getElementById('copyCloudSummaryBtn').addEventListener('click', copyLineSummary);
+
+      document.querySelectorAll('.dining-mode-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.isDineIn = btn.dataset.diningMode === 'dine-in';
+          try {
+            localStorage.setItem(STORAGE_KEYS.DINING_MODE, state.isDineIn ? 'dine-in' : 'takeout');
+          } catch (err) {
+            // 忽略例外
+          }
+          renderCloudSummarySection();
+        });
+      });
+
+      document.querySelectorAll('.stats-view-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.stats-view-btn').forEach((b) => {
+            b.classList.remove('active');
+            b.classList.add('text-[#6E6E73]');
+          });
+          btn.classList.add('active');
+          btn.classList.remove('text-[#6E6E73]');
+          state.statsView = btn.dataset.statsView;
+          renderCloudSummarySection();
+        });
+      });
+
+      // 13. 全域事件委派（菜單加入按鈕、待送出清單增減、雲端紀錄兩段式刪除）
+      let confirmDeleteTimer = null;
+      document.addEventListener('click', (e) => {
+        // 加入待送出清單
+        const addBtn = e.target.closest('.add-draft-btn');
+        if (addBtn) {
+          addItemToDraftCart(
+            addBtn.dataset.addKey,
+            addBtn.dataset.addName,
+            addBtn.dataset.addCat,
+            Number(addBtn.dataset.addPrice)
+          );
+          return;
+        }
+
+        // 調整待送出清單數量
+        const draftQtyBtn = e.target.closest('.draft-qty-btn');
+        if (draftQtyBtn) {
+          changeDraftQty(draftQtyBtn.dataset.draftKey, Number(draftQtyBtn.dataset.draftDelta));
+          return;
+        }
+
+        // 刪除雲端紀錄（兩段式安全確認，免用 confirm()）
+        const cloudDelBtn = e.target.closest('.cloud-del-btn');
+        if (cloudDelBtn) {
+          const action = cloudDelBtn.dataset.delAction;
+          const val = cloudDelBtn.dataset.delValue;
+          const token = `${action === 'deleteItem' ? 'item' : 'orderer'}:${val}`;
+
+          if (state.confirmDeleteTarget !== token) {
+            state.confirmDeleteTarget = token;
+            renderCloudSummarySection();
+            clearTimeout(confirmDeleteTimer);
+            confirmDeleteTimer = setTimeout(() => {
+              state.confirmDeleteTarget = null;
+              renderCloudSummarySection();
+            }, 3500);
+          } else {
+            clearTimeout(confirmDeleteTimer);
+            deleteCloudRecord(action, val);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
